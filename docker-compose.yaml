@@ -1,0 +1,69 @@
+version: "3.8"
+# Compose file build variables set in .env
+services:
+  supervisor:
+    build:
+      context: ./build
+      args:
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:latest-cuda}
+      tags:
+        - "ghcr.io/ai-dock/webui:${IMAGE_TAG:-latest-jupyter}"
+        
+    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-latest-jupyter}
+    
+    security_opt:
+      # For Rclone mount
+      - apparmor:unconfined
+      # For AMD GPU
+      #- seccomp:unconfined
+    
+    cap_add:
+      # For Rclone mount
+      - SYS_ADMIN
+    
+    devices:
+      # For Rclone mount
+      - "/dev/fuse:/dev/fuse"
+      # For AMD GPU
+      #- "/dev/kfd:/dev/kfd"
+      #- "/dev/dri:/dev/dri"
+      
+    # For AMD GPU
+    #group_add:
+    #  - video
+    #  - render
+    
+    volumes:
+      # For Rclone mount
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - ./config/rclone:/etc/rclone
+      # Workspace
+      - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      # Will echo to root-owned authorized_keys file;
+      # Avoids changing local file owner
+      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
+      - ./config/provisioning/get-models-sd-official.sh:/opt/ai-dock/bin/provisioning.sh
+    
+    ports:
+        # SSH available on host machine port 2222 to avoid conflict. Change to suit
+        - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
+        # ComfyUI web interface
+        - ${WEBUI_PORT_HOST:-8188}:${WEBUI_PORT:-8188}
+        # Jupyter server
+        - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
+        # Rclone webserver for interactive configuration
+        - ${RCLONE_PORT_HOST:-53682}:53682
+   
+    environment:
+        # Don't enclose values in quotes
+        - WEBUI_BRANCH=${WEBUI_BRANCH:-master}
+        - WEBUI_FLAGS=${WEBUI_FLAGS:-}
+        - WEBUI_PORT=${WEBUI_PORT:-8188}
+        - JUPYTER_TOKEN=${JUPYTER_TOKEN:-password}
+        # Allows running true SSH alongside provider proxy SSH
+        - SSH_PORT=${SSH_PORT:-22}
+        - WORKSPACE=${WORKSPACE:-/workspace}
+        - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+        - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
+        # - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
