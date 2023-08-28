@@ -7,7 +7,7 @@ main() {
     install_webui
 }
 
-install_comfyui() {
+install_webui() {
     /opt/ai-dock/bin/update-webui.sh
 }
 
