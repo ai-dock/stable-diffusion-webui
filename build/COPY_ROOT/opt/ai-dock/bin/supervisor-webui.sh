@@ -3,7 +3,7 @@
 trap 'kill $(jobs -p)' EXIT
 
 if [[ -z $WEBUI_PORT ]]; then
-    WEBUI_PORT=8188
+    WEBUI_PORT=7860
 fi
 
 printf "Starting webui...\n"
