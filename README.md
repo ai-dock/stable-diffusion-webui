@@ -364,7 +364,7 @@ Some ports need to be exposed for the services to run or for certain features of
 - Select `Advanced options`
 - In Container Name enter `ghcr.io/ai-dock/stable-diffusion-webui:latest-jupyter`
 - In Registry Username enter `x` (Paperspace bug)
-- In Command enter `init.sh WORKSPACE=/notebooks PROVISIONING_SCRIPT="https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/get-models-sd-official.sh" CF_QUICK_TUNNELS=true`
+- In Command enter `init.sh WORKSPACE=/notebooks PROVISIONING_SCRIPT="https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/default.sh" CF_QUICK_TUNNELS=true`
 
 You can use the web UI to do further configuration, or you can supply further environment variables as detailed above.
 
