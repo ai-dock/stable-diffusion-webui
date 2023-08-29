@@ -9,7 +9,10 @@ LABEL org.opencontainers.image.description "Automatic1111 Stable Diffusion Web U
 
 LABEL maintainer="Rob Ballantyne <rob@dynamedia.uk>"
 
-
+# Use a very long start period. We will handle startup failures.
+HEALTHCHECK --start-period=12h --interval=30s --timeout=3s \
+  CMD /opt/ai-dock/bin/healthcheck.sh
+  
 # Copy early so we can use scripts in the build - Changes to these files will invalidate the cache and cause a rebuild.
 COPY ./COPY_ROOT/ /
 
