@@ -9,10 +9,6 @@ LABEL org.opencontainers.image.description "Automatic1111 Stable Diffusion Web U
 
 LABEL maintainer="Rob Ballantyne <rob@dynamedia.uk>"
 
-# Use a very long start period. We will handle startup failures.
-HEALTHCHECK --start-period=12h --interval=30s --timeout=3s \
-  CMD /opt/ai-dock/bin/healthcheck.sh
-  
 # Copy early so we can use scripts in the build - Changes to these files will invalidate the cache and cause a rebuild.
 COPY ./COPY_ROOT/ /
 
@@ -20,9 +16,10 @@ COPY ./COPY_ROOT/ /
 # Don't put anything heavy in here - We can use multi-stage building above if necessary.
 
 ARG IMAGE_BASE
-RUN bash -c /opt/ai-dock/bin/build/layer0/init.sh
+RUN /opt/ai-dock/bin/build/layer0/init.sh
 
 ENV MAMBA_DEFAULT_ENV=webui
+ENV MAMBA_DEFAULT_RUN="micromamba run -n ${MAMBA_DEFAULT_ENV}"
 
 # Keep init.sh as-is and place additional logic in /opt/ai-dock/bin/preflight.sh
 CMD ["init.sh"]

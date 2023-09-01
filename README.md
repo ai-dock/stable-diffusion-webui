@@ -160,10 +160,12 @@ It can be useful to perform certain actions when starting a container, such as c
 
 You can use the environment variable `PROVISIONING_SCRIPT` to specify the URL of a script you'd like to run.
 
+The URL must point to a plain text file - GitHub Gists/Pastebin (raw) are suitable options.
+
 If you are running locally you may instead opt to mount a script at `/opt/ai-dock/bin/provisioning.sh`.
 
 >[!NOTE]  
->`supervisord` will not spawn any processes until the provisioning script has completed. If the script needs to download models or datasets it may take some time for your container to become interactive.
+>If configured, `sshd`, `cloudflared`, `rclone`, `jupyter` & `logtail` will be launched before provisioning;  `webui` will launch after.
 
 >[!WARNING]  
 >Only use scripts that you trust and which cannot be changed without your consent.
@@ -344,17 +346,17 @@ Some ports need to be exposed for the services to run or for certain features of
 
 **Vast.​ai**
 
-- [comfyui:latest](https://link.ai-dock.org/template-vast-sd-webui)
+- [A1111 WebUI:latest](https://link.ai-dock.org/template-vast-sd-webui)
 
-- [comfyui:latest-jupyter](https://link.ai-dock.org/template-vast-comfyui-sd-webui-jupyter)
+- [A1111 WebUI:latest-jupyter](https://link.ai-dock.org/template-vast-sd-webui-jupyter)
 
 ---
 
 **Runpod.​io**
 
-- [comfyui:latest](https://link.ai-dock.org/template-runpod-sd-webui)
+- [A1111 WebUI:latest](https://link.ai-dock.org/template-runpod-sd-webui)
 
-- [comfyui:latest-jupyter](https://link.ai-dock.org/template-runpod-sd-webui-jupyter)
+- [A1111 WebUI:latest-jupyter](https://link.ai-dock.org/template-runpod-sd-webui-jupyter)
 
 ---
 
@@ -377,7 +379,7 @@ You can use the web UI to do further configuration, or you can supply further en
 ---
 
 >[!NOTE]  
->These templates are configured to use the `:latest` tag but you are free to change to any of the available Pytorch CUDA tags listed [here](https://github.com/ai-dock/pytorch/pkgs/container/pytorch)
+>These templates are configured to use the `:latest` tag but you are free to change to any of the available CUDA tags listed [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui)
 
 ## Compatible VM Providers
 

@@ -5,7 +5,7 @@
 # https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/get-models-sd-official.sh
 printf "\n##############################################\n#                                            #\n#          Provisioning container            #\n#                                            #\n#         This will take some time           #\n#                                            #\n# Your container will be ready on completion #\n#                                            #\n##############################################\n\n"
 function download() {
-    wget -q --show-progress --progress=dot -e dotbytes="${3:-4M}" -O "$2" "$1"
+    wget -q --show-progress -e dotbytes="${3:-4M}" -O "$2" "$1"
 }
 # Download Stable Diffusion official models
 webui_dir=/opt/stable-diffusion-webui
@@ -32,17 +32,19 @@ else
     )
 fi
 
-# Dreambooth
-printf "Setting up Dreambooth...\n"
-if [[ -d sd_dreambooth_extension ]]; then
-    (cd sd_dreambooth_extension && \
-        git pull && \
-        micromamba run -n webui ${PIP_INSTALL} -r requirements.txt
-    )
-else
-    (git clone https://github.com/d8ahazard/sd_dreambooth_extension && \
-        micromamba run -n webui ${PIP_INSTALL} -r sd_dreambooth_extension/requirements.txt
-    )
+if [[ $XPU_TARGET != "CPU" && $WEBUI_FLAGS != *"--use-cpu all"* ]]; then
+    # Dreambooth
+    printf "Setting up Dreambooth...\n"
+    if [[ -d sd_dreambooth_extension ]]; then
+        (cd sd_dreambooth_extension && \
+            git pull && \
+            micromamba run -n webui ${PIP_INSTALL} -r requirements.txt
+        )
+    else
+        (git clone https://github.com/d8ahazard/sd_dreambooth_extension && \
+            micromamba run -n webui ${PIP_INSTALL} -r sd_dreambooth_extension/requirements.txt
+        )
+    fi
 fi
 
 # Dynamic Prompts
@@ -51,6 +53,7 @@ if [[ -d sd-dynamic-prompts ]]; then
     (cd sd-dynamic-prompts && git pull)
 else
     git clone https://github.com/adieyal/sd-dynamic-prompts.git
+    micromamba run -n webui ${PIP_INSTALL} -U dynamicprompts[attentiongrabber,magicprompt]
 fi
 
 # Face Editor

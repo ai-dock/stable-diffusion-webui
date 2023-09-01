@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Must exit and fail to build if any command fails
-set -e
+set -eo pipefail
 
 webui_git="https://github.com/AUTOMATIC1111/stable-diffusion-webui"
 
