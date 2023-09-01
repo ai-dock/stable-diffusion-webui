@@ -11,6 +11,8 @@ Run [Automatic1111 WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webu
 
 Simply declare your [environment variables](#environment-variables) and launch a container with `docker compose` or choose a pre-configured [cloud template](#pre-configured-templates).
 
+See [this section](#stable-diffusion-webui) for Stable Diffusion Web UI specific configuration options.
+
 ## About AUTOMATIC1111 WebUI
 
 A popular and feature-rich web interface for Stable Diffusion based on the Gradio library.
@@ -163,6 +165,53 @@ You can use the environment variable `PROVISIONING_SCRIPT` to specify the URL of
 The URL must point to a plain text file - GitHub Gists/Pastebin (raw) are suitable options.
 
 If you are running locally you may instead opt to mount a script at `/opt/ai-dock/bin/provisioning.sh`.
+
+### Default provisionining
+
+This repository contains a [directory](https://github.com/ai-dock/stable-diffusion-webui/tree/main/config/provisioning) for pre-made provisioning scripts.
+
+All [cloud templates](#pre-configured-templates) will run [default.sh](https://github.com/ai-dock/stable-diffusion-webui/tree/main/config/provisioning/default.sh) unless otherwise indicated or overridden by the user.
+
+This script will download & install the following:
+
+__Models__
+
+- Stable Diffusion 1.5
+- Stable Diffusion 2.1
+- Stable Diffusion XL
+- Stable Diffusion XL Refiner
+
+__Extensions__
+
+- Controlnet
+- Dynamic Prompts
+- Face Editor
+- Image Browser
+- Regional Prompter
+- Ultimate Upscale
+
+__Controlnet (pruned safetensors)__
+
+- Canny
+- Depth
+- Openpose
+- Scribble
+
+__Upscalers__
+
+- 4x_foolhardy_Remacri.pth
+- 4x_NMKD-Siax_200k.pth
+- RealESRGAN_x4.pth
+
+__VAE__
+
+- vae-ft-ema-560000-ema-pruned.safetensors
+- vae-ft-mse-840000-ema-pruned.safetensors
+- sdxl_vae.safetensors
+
+
+Remember, you do not have to use this script - Just set `PROVISIONING_SCRIPT=https://example.com/your-script.sh`.
+
 
 >[!NOTE]  
 >If configured, `sshd`, `cloudflared`, `rclone`, `jupyter` & `logtail` will be launched before provisioning;  `webui` will launch after.
@@ -366,9 +415,11 @@ Some ports need to be exposed for the services to run or for certain features of
 - Select `Advanced options`
 - In Container Name enter `ghcr.io/ai-dock/stable-diffusion-webui:latest-jupyter`
 - In Registry Username enter `x` (Paperspace bug)
-- In Command enter `init.sh WORKSPACE=/notebooks PROVISIONING_SCRIPT="https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/default.sh" CF_QUICK_TUNNELS=true`
+- In Command enter `init.sh WORKSPACE=/notebooks PROVISIONING_SCRIPT="https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/default.sh" WEBUI_FLAGS="--xformers" CF_QUICK_TUNNELS=true`
 
 You can use the web UI to do further configuration, or you can supply further environment variables as detailed above.
+
+To launch the UI, open `webui.ipynb` and run cell 4 (`Get secure Web UI link`)
 
 >[!NOTE]  
 >The use of `CF_QUICK_TUNNELS` enables us to reach the web UI with a link supplied by Cloudflare. You can find the link in `/var/log/supervisor/quicktunnel-webui.log`

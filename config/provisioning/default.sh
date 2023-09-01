@@ -2,12 +2,13 @@
 
 # This file will be sourced in init.sh
 
-# https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/get-models-sd-official.sh
+# https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/default.sh
 printf "\n##############################################\n#                                            #\n#          Provisioning container            #\n#                                            #\n#         This will take some time           #\n#                                            #\n# Your container will be ready on completion #\n#                                            #\n##############################################\n\n"
+
 function download() {
     wget -q --show-progress -e dotbytes="${3:-4M}" -O "$2" "$1"
 }
-# Download Stable Diffusion official models
+
 webui_dir=/opt/stable-diffusion-webui
 models_dir=${webui_dir}/models
 sd_models_dir=${models_dir}/Stable-diffusion
@@ -80,7 +81,7 @@ else
     git clone https://github.com/hako-mikan/sd-webui-regional-prompter.git
 fi
 
-# Regional Prompter
+# Ultimate Upscale
 printf "Setting up Ultimate Upscale...\n"
 if [[ -d ultimate-upscale-for-automatic1111 ]]; then
     (cd ultimate-upscale-for-automatic1111 && git pull)
@@ -170,14 +171,6 @@ if [[ ! -e ${model_file} ]]; then
     download ${model_url} ${model_file}
 fi
 
-model_file=${vae_models_dir}/vae-ft-ema-560000-ema-pruned.safetensors
-model_url=https://huggingface.co/stabilityai/sd-vae-ft-ema-original/resolve/main/vae-ft-ema-560000-ema-pruned.safetensors
-
-if [[ ! -e ${model_file} ]]; then
-    printf "Downloading vae-ft-ema-560000-ema...\n"
-    download ${model_url} ${model_file}
-fi
-
 model_file=${vae_models_dir}/vae-ft-mse-840000-ema-pruned.safetensors
 model_url=https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors
 
@@ -219,5 +212,7 @@ if [[ ! -e ${model_file} ]]; then
     printf "Downloading RealESRGAN_x4...\n"
     download ${model_url} ${model_file}
 fi
+
+printf "\nProvisioning complete:  Web UI will start now\n\n"
 
 
