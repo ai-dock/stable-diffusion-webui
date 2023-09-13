@@ -48,8 +48,12 @@ services:
     ports:
         # SSH available on host machine port 2222 to avoid conflict. Change to suit
         - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
+        # redirect to Cloudflare quick tunnel
+        - ${REDIRECTOR_PORT_HOST}:1111
+        # Websocket log viewer
+        - ${LOG_VIEWER_PORT_HOST}:1122
         # ComfyUI web interface
-        - ${WEBUI_PORT_HOST:-8188}:${WEBUI_PORT:-8188}
+        - ${WEBUI_PORT_HOST:-7860}:${WEBUI_PORT:-7860}
         # Jupyter server
         - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
         # Rclone webserver for interactive configuration

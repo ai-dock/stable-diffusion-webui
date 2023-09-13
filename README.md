@@ -234,6 +234,7 @@ Micromamba environments are particularly useful where several software packages 
 | `base`         | micromamba's base environment |
 | `webui`        | AUTOMATIC1111 WebUI and dependencies |
 | `system`       | `supervisord`, `openssh` `rclone` |
+| `fastapi`      | `logtail web UI`, `port redirector web UI` |
 | `python_[ver]` | `python` |
 
 If you are extending this image or running an interactive session where additional software is required, you should almost certainly create a new environment first. See below for guidance.
@@ -305,6 +306,25 @@ Jupyter's official documentation is available at https://jupyter.org/
 
 >[!NOTE]  
 >_If you have enabled `CF_QUICK_TUNNELS` a secure `https://[random-auto-generated-sub-domain].trycloudflare.com` link will be created. You can find it at `/var/log/supervisor/quicktunnel-jupyter.log`_
+
+### Port Redirector
+
+This is a simple list of links to the web services available inside the container.
+
+The service will bind to port `1111`.
+
+For each service, you will find a direct link and, if you have set `CF_QUICK_TUNNELS=true`, a link to the service via a fast and secure Cloudflare tunnel.
+
+>[!NOTE]  
+>*This service will not show links to any pre-configured Cloudflare tunnels as the domains are static and already known to the user.*
+
+### Log Viewer
+
+The web based log viewer will start on port `1122`.
+
+It's a very lightweight websocket based stream of the latest updates in `/var/log/logtail.log`.
+
+This service will also be accessible on any other exposed ports until the program designated to that port is ready to use.
 
 ### Cloudflared
 
@@ -388,6 +408,8 @@ Some ports need to be exposed for the services to run or for certain features of
 | Open Port             | Service / Description |
 | --------------------- | --------------------- |
 | `22`                  | SSH server            |
+| `1111`                | Port redirector web UI    |
+| `1122`                | Log viewer web UI         |
 | `7860`                | Stable Diffusion WebUI |
 | `53682`               | Rclone interactive config |
 

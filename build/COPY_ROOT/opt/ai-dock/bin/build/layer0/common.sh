@@ -18,6 +18,8 @@ create_env() {
     exported_env=/tmp/${MAMBA_DEFAULT_ENV}.yaml
     micromamba env export -n ${MAMBA_DEFAULT_ENV} > "${exported_env}"
     $MAMBA_CREATE -n webui --file "${exported_env}"
+    $MAMBA_INSTALL -n webui -c conda-forge -y \
+        gperftools
 }
 
 install_jupyter_kernels() {

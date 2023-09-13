@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.description "Automatic1111 Stable Diffusion Web U
 
 LABEL maintainer="Rob Ballantyne <rob@dynamedia.uk>"
 
+ENV IMAGE_SLUG="stable-diffusion-webui"
 # Copy early so we can use scripts in the build - Changes to these files will invalidate the cache and cause a rebuild.
 COPY ./COPY_ROOT/ /
 
