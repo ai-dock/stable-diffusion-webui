@@ -8,7 +8,7 @@ printf "\n##############################################\n#                     
 function download() {
     wget -q --show-progress -e dotbytes="${3:-4M}" -O "$2" "$1"
 }
-
+disk_space=$(df --output=avail -m $WORKSPACE|tail -n1)
 webui_dir=/opt/stable-diffusion-webui
 models_dir=${webui_dir}/models
 sd_models_dir=${models_dir}/Stable-diffusion
@@ -89,10 +89,8 @@ else
     git clone https://github.com/Coyote-A/ultimate-upscale-for-automatic1111
 fi
 
-printf "Downloading official SD models..."
-
 # v1-5-pruned-emaonly
-model_file=${sd_models_dir}/v1-5-pruned-emaonly.ckpt
+model_file=${sd_models_dir}/_v1-5-pruned-emaonly.ckpt
 model_url=https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.ckpt
 
 if [[ ! -e ${model_file} ]]; then
@@ -100,33 +98,37 @@ if [[ ! -e ${model_file} ]]; then
     download ${model_url} ${model_file}
 fi
 
-# v2-1_768-ema-pruned
-model_file=${sd_models_dir}/v2-1_768-ema-pruned.ckpt
-model_url=https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt
-
-if [[ ! -e ${model_file} ]]; then
-    printf "Downloading Stable Diffusion 2.1...\n"
-    download ${model_url} ${model_file}
+if [[ $disk_space -ge 25000 ]]; then
+    # v2-1_768-ema-pruned
+    model_file=${sd_models_dir}/v2-1_768-ema-pruned.ckpt
+    model_url=https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-ema-pruned.ckpt
+    
+    if [[ ! -e ${model_file} ]]; then
+        printf "Downloading Stable Diffusion 2.1...\n"
+        download ${model_url} ${model_file}
+    fi
+    
+    
+    # sd_xl_base_1
+    model_file=${sd_models_dir}/sd_xl_base_1.0.safetensors
+    model_url=https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+    
+    if [[ ! -e ${model_file} ]]; then
+        printf "Downloading Stable Diffusion XL base...\n"
+        download ${model_url} ${model_file} 
+    fi
+    
+    # sd_xl_refiner_1
+    model_file=${sd_models_dir}/sd_xl_refiner_1.0.safetensors
+    model_url=https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors
+    
+    if [[ ! -e ${model_file} ]]; then
+        printf "Downloading Stable Diffusion XL refiner...\n"
+        download ${model_url} ${model_file}
+    fi
+else
+        printf "\nSkipping extra models (disk < 30GB)\n"
 fi
-
-# sd_xl_base_1
-model_file=${sd_models_dir}/sd_xl_base_1.0.safetensors
-model_url=https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
-
-if [[ ! -e ${model_file} ]]; then
-    printf "Downloading Stable Diffusion XL base...\n"
-    download ${model_url} ${model_file} 
-fi
-
-# sd_xl_refiner_1
-model_file=${sd_models_dir}/sd_xl_refiner_1.0.safetensors
-model_url=https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors
-
-if [[ ! -e ${model_file} ]]; then
-    printf "Downloading Stable Diffusion XL refiner...\n"
-    download ${model_url} ${model_file}
-fi
-
 printf "Downloading a few pruned controlnet models...\n"
 
 model_file=${cn_models_dir}/control_canny-fp16.safetensors
