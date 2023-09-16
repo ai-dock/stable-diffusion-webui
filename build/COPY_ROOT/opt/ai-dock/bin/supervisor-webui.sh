@@ -29,7 +29,7 @@ BASE_FLAGS="--listen --port ${WEBUI_PORT} --skip-prepare-environment"
 if [[ -f /run/provisioning_script ]]; then
     micromamba run -n fastapi python /opt/ai-dock/fastapi/logviewer/main.py \
         -p $WEBUI_PORT \
-        -r 30 \
+        -r 5 \
         -s "${SERVICE_NAME}" \
         -t "Preparing ${SERVICE_NAME}" &
     fastapi_pid=$!
