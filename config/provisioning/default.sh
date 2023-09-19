@@ -54,7 +54,9 @@ if [[ -d sd-dynamic-prompts ]]; then
     (cd sd-dynamic-prompts && git pull)
 else
     git clone https://github.com/adieyal/sd-dynamic-prompts.git
-    micromamba run -n webui ${PIP_INSTALL} -U dynamicprompts[attentiongrabber,magicprompt]
+    micromamba run -n webui ${PIP_INSTALL} -U \
+        dynamicprompts[attentiongrabber,magicprompt]~=0.29.0 \
+        send2trash~=1.8
 fi
 
 # Face Editor
