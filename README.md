@@ -405,12 +405,12 @@ If you are logged into the container you can follow the logs by running `logtail
 Some ports need to be exposed for the services to run or for certain features of the provided software to function
 
 
-| Open Port             | Service / Description |
-| --------------------- | --------------------- |
-| `22`                  | SSH server            |
+| Open Port             | Service / Description     |
+| --------------------- | ------------------------- |
+| `22`                  | SSH server                |
 | `1111`                | Port redirector web UI    |
 | `1122`                | Log viewer web UI         |
-| `7860`                | Stable Diffusion WebUI |
+| `7860`                | Stable Diffusion WebUI    |
 | `53682`               | Rclone interactive config |
 
 ## Pre-Configured Templates
@@ -441,10 +441,10 @@ Some ports need to be exposed for the services to run or for certain features of
 
 You can use the web UI to do further configuration, or you can supply further environment variables as detailed above.
 
-To launch the UI, open `webui.ipynb` and run cell 4 (`Get secure Web UI link`)
+To launch the UI, open `webui.ipynb` and run cell 4 (`Get secure UI links`)
 
 >[!NOTE]  
->The use of `CF_QUICK_TUNNELS` enables us to reach the web UI with a link supplied by Cloudflare. You can find the link in `/var/log/supervisor/quicktunnel-webui.log`
+>The use of `CF_QUICK_TUNNELS` enables us to reach the web UI with a link supplied by Cloudflare. You can find the links by running `cfqt-url.sh -p 1111`.
 
 >[!WARNING]  
 >Do not attempt to use tunnels to circumvent Paperspace restrictions (eg. SSH & private networking) - You will lose your account.
