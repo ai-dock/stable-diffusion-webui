@@ -43,7 +43,7 @@ services:
       # Will echo to root-owned authorized_keys file;
       # Avoids changing local file owner
       - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
-      - ./config/provisioning/default.sh:/opt/ai-dock/bin/provisioning.sh
+      #- ./config/provisioning/default.sh:/opt/ai-dock/bin/provisioning.sh
     
     ports:
         # SSH available on host machine port 2222 to avoid conflict. Change to suit
@@ -64,10 +64,13 @@ services:
         - WEBUI_BRANCH=${WEBUI_BRANCH:-master}
         - WEBUI_FLAGS=${WEBUI_FLAGS:-}
         - WEBUI_PORT=${WEBUI_PORT:-8188}
-        - JUPYTER_TOKEN=${JUPYTER_TOKEN:-password}
         # Allows running true SSH alongside provider proxy SSH
         - SSH_PORT=${SSH_PORT:-22}
         - WORKSPACE=${WORKSPACE:-/workspace}
+        - WORKSPACE_SYNC=${WORKSPACE_SYNC}
         - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
         - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
+        - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
+        - WEB_USER=${WEB_USER}
+        - WEB_PASSWORD=${WEB_PASSWORD}
         # - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}

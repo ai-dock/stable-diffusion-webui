@@ -148,13 +148,29 @@ You can use the included `cloudflared` service to make secure connections withou
 | `SKIP_ACL`            | Set `true` to skip modifying workspace ACL |
 | `SSH_PORT`            | Set a non-standard port for SSH (default `22`) |
 | `SSH_PUBKEY`          | Your public key for SSH |
+| `WEB_ENABLE_AUTH`     | Enable password protection for web services (default `true`) |
+| `WEB_USER`            | Username for web services (default `user`) |
+| `WEB_PASSWORD`        | Password for web services (default `password`) |
 | `WORKSPACE`           | A volume path. Defaults to `/workspace/` |
+| `WORKSPACE_SYNC`      | Move mamba environments and services to workspace if mounted (default `true`) |
 
 Environment variables can be specified by using any of the standard methods (`docker-compose.yaml`, `docker run -e...`). Additionally, environment variables can also be passed as parameters of `init.sh`.
 
 Passing environment variables to init.sh is usually unnecessary, but is useful for some cloud environments where the full `docker run` command cannot be specified.
 
 Example usage: `docker run -e STANDARD_VAR1="this value" -e STANDARD_VAR2="that value" init.sh EXTRA_VAR="other value"`
+
+## Security
+
+By default, all exposed web services other than the port redirect page are protected by HTTP basic authentication.
+
+The default username is `user` and the password is `password`.
+
+You can set your credentials by passing environment variables as shown above.
+
+The password is stored as a bcrypt hash. If you prefer not to pass a plain text password to the container you can pre-hash and use the variable `WEB_PASSWORD_HASH`.
+
+If you are running the image locally on a trusted network, you may disable authentication by setting the environment variable `WEB_ENABLE_AUTH=false`.
 
 ## Provisioning script
 
@@ -214,7 +230,7 @@ Remember, you do not have to use this script - Just set `PROVISIONING_SCRIPT=htt
 
 
 >[!NOTE]  
->If configured, `sshd`, `cloudflared`, `rclone`, `jupyter` & `logtail` will be launched before provisioning;  `webui` will launch after.
+>If configured, `sshd`, `caddy`, `cloudflared`, `rclone`, `port redirector` & `logtail` will be launched before provisioning; Any other processes will launch after.
 
 >[!WARNING]  
 >Only use scripts that you trust and which cannot be changed without your consent.
@@ -233,8 +249,6 @@ Micromamba environments are particularly useful where several software packages 
 | -------------- | ----------------------------------------- |
 | `base`         | micromamba's base environment |
 | `webui`        | AUTOMATIC1111 WebUI and dependencies |
-| `system`       | `supervisord`, `openssh` `rclone` |
-| `fastapi`      | `logtail web UI`, `port redirector web UI` |
 | `python_[ver]` | `python` |
 
 If you are extending this image or running an interactive session where additional software is required, you should almost certainly create a new environment first. See below for guidance.
@@ -306,6 +320,12 @@ Jupyter's official documentation is available at https://jupyter.org/
 
 >[!NOTE]  
 >_If you have enabled `CF_QUICK_TUNNELS` a secure `https://[random-auto-generated-sub-domain].trycloudflare.com` link will be created. You can find it at `/var/log/supervisor/quicktunnel-jupyter.log`_
+
+### Caddy
+
+This is a simple webserver acting as a reverse proxy.
+
+Caddy is used to enable basic authentication for all sensitive web services.
 
 ### Port Redirector
 
