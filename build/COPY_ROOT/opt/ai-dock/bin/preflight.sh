@@ -5,6 +5,7 @@
 function preflight_main() {
     preflight_copy_notebook
     preflight_update_webui
+    printf "%s" "${WEBUI_FLAGS}" > /etc/a1111_webui_flags.conf
 }
 
 function preflight_copy_notebook() {
@@ -16,7 +17,11 @@ function preflight_copy_notebook() {
 }
 
 function preflight_update_webui() {
-    /opt/ai-dock/bin/update-webui.sh
+    if [[ ${AUTO_UPDATE,,} != "false" ]]; then
+        /opt/ai-dock/bin/update-webui.sh
+    else
+        printf "Skipping auto update (AUTO_UPDATE=false)"
+    fi
 }
 
 preflight_main "$@"

@@ -22,4 +22,3 @@ git checkout ${branch}
 git pull
 
 micromamba run -n webui ${PIP_INSTALL} -r requirements_versions.txt
-micromamba run -n webui python launch.py --skip-torch-cuda-test --skip-python-version-check --no-download-sd-model --do-not-download-clip --exit

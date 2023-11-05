@@ -11,63 +11,63 @@ function cleanup() {
     rm /run/http_ports/$PORT > /dev/null 2>&1
 }
 
-if [[ -z $WEBUI_PORT ]]; then
-    WEBUI_PORT=7860
-fi
-
-PROXY_PORT=$WEBUI_PORT
-SERVICE_NAME="A1111 SD Web UI"
-
-file_content="$(
-  jq --null-input \
-    --arg listen_port "${LISTEN_PORT}" \
-    --arg metrics_port "${METRICS_PORT}" \
-    --arg proxy_port "${PROXY_PORT}" \
-    --arg proxy_secure "${PROXY_SECURE,,}" \
-    --arg service_name "${SERVICE_NAME}" \
-    '$ARGS.named'
-)"
-
-printf "%s" "$file_content" > /run/http_ports/$PROXY_PORT
-
-printf "Starting $SERVICE_NAME...\n"
-
-PLATFORM_FLAGS=""
-if [[ $XPU_TARGET = "CPU" ]]; then
-    PLATFORM_FLAGS="--use-cpu all --skip-torch-cuda-test --no-half"
-fi
-# We can safely --skip-prepare-environment because it's already been done
-BASE_FLAGS="--port ${LISTEN_PORT} --skip-prepare-environment"
-
-# Delay launch until micromamba is ready
-if [[ -f /run/workspace_moving || -f /run/provisioning_script ]]; then
-    kill -9 $(lsof -t -i:$LISTEN_PORT) > /dev/null 2>&1 &
-    wait -n
-    /usr/bin/python3 /opt/ai-dock/fastapi/logviewer/main.py \
-        -p $LISTEN_PORT \
-        -r 5 \
-        -s "${SERVICE_NAME}" \
-        -t "Preparing ${SERVICE_NAME}" &
-    fastapi_pid=$!
+function start() {
+    if [[ -z $WEBUI_PORT ]]; then
+        WEBUI_PORT=7860
+    fi
     
-    while [[ -f /run/workspace_moving || -f /run/provisioning_script ]]; do
-        sleep 1
-    done
+    PROXY_PORT=$WEBUI_PORT
+    SERVICE_NAME="A1111 SD Web UI"
     
-    printf "\nStarting %s... " ${SERVICE_NAME:-service}
-    kill $fastapi_pid &
+    file_content="$(
+      jq --null-input \
+        --arg listen_port "${LISTEN_PORT}" \
+        --arg metrics_port "${METRICS_PORT}" \
+        --arg proxy_port "${PROXY_PORT}" \
+        --arg proxy_secure "${PROXY_SECURE,,}" \
+        --arg service_name "${SERVICE_NAME}" \
+        '$ARGS.named'
+    )"
+    
+    printf "%s" "$file_content" > /run/http_ports/$PROXY_PORT
+    
+    printf "Starting $SERVICE_NAME...\n"
+    
+    PLATFORM_FLAGS=
+    if [[ $XPU_TARGET = "CPU" ]]; then
+        PLATFORM_FLAGS="--use-cpu all --skip-torch-cuda-test --no-half"
+    fi
+    # No longer skipping prepare-environment
+    BASE_FLAGS=
+    
+    # Delay launch until micromamba is ready
+    if [[ -f /run/workspace_sync || -f /run/container_config ]]; then
+        kill $(lsof -t -i:$LISTEN_PORT) > /dev/null 2>&1 &
+        wait -n
+        /usr/bin/python3 /opt/ai-dock/fastapi/logviewer/main.py \
+            -p $LISTEN_PORT \
+            -r 5 \
+            -s "${SERVICE_NAME}" \
+            -t "Preparing ${SERVICE_NAME}" &
+        fastapi_pid=$!
+        
+        while [[ -f /run/workspace_sync || -f /run/container_config ]]; do
+            sleep 1
+        done
+        
+        kill $fastapi_pid
+        wait $fastapi_pid 2>/dev/null
+    fi
+    
+    kill $(lsof -t -i:$LISTEN_PORT) > /dev/null 2>&1 &
     wait -n
-    printf "OK\n"
-else
-    printf "Starting %s...\n" ${SERVICE_NAME}
-fi
+    
+    FLAGS_COMBINED="${PLATFORM_FLAGS} ${BASE_FLAGS} $(cat /etc/a1111_webui_flags.conf)"
+    printf "Starting %s...\n" "${SERVICE_NAME}"
+    
+    cd /opt/stable-diffusion-webui &&
+    exec micromamba run -n webui python launch.py \
+        ${FLAGS_COMBINED} --port ${LISTEN_PORT}
+}
 
-kill -9 $(lsof -t -i:$LISTEN_PORT) > /dev/null 2>&1 &
-wait -n
-
-cd /opt/stable-diffusion-webui
-
-micromamba run -n webui python launch.py \
-    ${PLATFORM_FLAGS} \
-    ${BASE_FLAGS} \
-    ${WEBUI_FLAGS}
+start 2>&1

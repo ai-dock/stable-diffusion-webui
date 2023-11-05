@@ -16,4 +16,8 @@ else
     exit 1
 fi
 
+# webui 'prepare-environment'
+cd /opt/stable-diffusion-webui
+micromamba run -n webui python launch.py --skip-torch-cuda-test --skip-python-version-check --no-download-sd-model --do-not-download-clip --exit
+
 /opt/ai-dock/bin/build/layer0/clean.sh

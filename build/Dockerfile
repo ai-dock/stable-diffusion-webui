@@ -17,10 +17,14 @@ COPY ./COPY_ROOT/ /
 # Don't put anything heavy in here - We can use multi-stage building above if necessary.
 
 ARG IMAGE_BASE
-RUN /opt/ai-dock/bin/build/layer0/init.sh
+RUN /opt/ai-dock/bin/build/layer0/init.sh | tee /var/log/build.log
 
+ENV OPT_SYNC=stable-diffusion-webui:$OPT_SYNC
 ENV MAMBA_DEFAULT_ENV=webui
 ENV MAMBA_DEFAULT_RUN="micromamba run -n ${MAMBA_DEFAULT_ENV}"
 
+# Set false when building specific versions
+ARG AUTO_UPDATE=true
+ENV AUTO_UPDATE=$AUTO_UPDATE
 # Keep init.sh as-is and place additional logic in /opt/ai-dock/bin/preflight.sh
 CMD ["init.sh"]
