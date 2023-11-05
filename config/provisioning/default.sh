@@ -67,7 +67,7 @@ CONTROLNET_MODELS=(\
 ### DO NOT EDIT BELOW HERE UNLESS YOU KNOW WHAT YOU ARE DOING ###
 
 function provisioning_start() {
-    DISK_GB_AVAILABLE=$(($(df --output=avail -m /var|tail -n1) / 1000))
+    DISK_GB_AVAILABLE=$(($(df --output=avail -m "${WORKSPACE}"|tail -n1) / 1000))
     provisioning_print_header
     provisioning_get_extensions
     provisioning_get_models \
