@@ -12,14 +12,19 @@ main() {
 }
 
 create_env() {
+    if [[ $PYTHON_VERSION == "3.10" ]]; then
+        $MAMBA_INSTALL -n ${MAMBA_DEFAULT_ENV} -c conda-forge -y \
+            python==3.10.6
+    fi
     apt-get update
-    $APT_INSTALL libgl1
+    $APT_INSTALL libgl1 libgoogle-perftools4
+    ln -sf $(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1) \
+        /lib/x86_64-linux-gnu/libtcmalloc.so
     # A new pytorch env costs ~ 300Mb
     exported_env=/tmp/${MAMBA_DEFAULT_ENV}.yaml
     micromamba env export -n ${MAMBA_DEFAULT_ENV} > "${exported_env}"
     $MAMBA_CREATE -n webui --file "${exported_env}"
     $MAMBA_INSTALL -n webui -c conda-forge -y \
-        gperftools \
         httpx=0.24.1
 }
 

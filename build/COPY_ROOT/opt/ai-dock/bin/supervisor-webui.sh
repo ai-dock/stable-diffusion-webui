@@ -8,7 +8,7 @@ PROXY_SECURE=true
 
 function cleanup() {
     kill $(jobs -p) > /dev/null 2>&1
-    rm /run/http_ports/$PORT > /dev/null 2>&1
+    rm /run/http_ports/$PROXY_PORT > /dev/null 2>&1
 }
 
 function start() {
@@ -66,7 +66,7 @@ function start() {
     printf "Starting %s...\n" "${SERVICE_NAME}"
     
     cd /opt/stable-diffusion-webui &&
-    exec micromamba run -n webui python launch.py \
+    exec micromamba run -n webui -e LD_PRELOAD=libtcmalloc.so python launch.py \
         ${FLAGS_COMBINED} --port ${LISTEN_PORT}
 }
 
