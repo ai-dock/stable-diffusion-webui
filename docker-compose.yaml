@@ -50,9 +50,7 @@ services:
         - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
         # redirect to Cloudflare quick tunnel
         - ${REDIRECTOR_PORT_HOST}:1111
-        # Websocket log viewer
-        - ${LOG_VIEWER_PORT_HOST}:1122
-        # ComfyUI web interface
+        # A1111 web interface
         - ${WEBUI_PORT_HOST:-7860}:${WEBUI_PORT:-7860}
         # Jupyter server
         - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
@@ -64,14 +62,16 @@ services:
         - AUTO_UPDATE=${AUTO_UPDATE:-true}
         - WEBUI_BRANCH=${WEBUI_BRANCH:-master}
         - WEBUI_FLAGS=${WEBUI_FLAGS:-}
-        - WEBUI_PORT=${WEBUI_PORT:-8188}
-        # Allows running true SSH alongside provider proxy SSH
+        - WEBUI_PORT=${WEBUI_PORT:-7860}
+        - DIRECT_ADDRESS=${DIRECT_ADDRESS:-127.0.0.1}
+        - DIRECT_ADDRESS_GET_WAN=${DIRECT_ADDRESS_GET_WAN:-false}
         - SSH_PORT=${SSH_PORT:-22}
         - WORKSPACE=${WORKSPACE:-/workspace}
-        - WORKSPACE_SYNC=${WORKSPACE_SYNC}
+        - WORKSPACE_SYNC=${WORKSPACE_SYNC:-true}
         - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
         - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
-        - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH}
-        - WEB_USER=${WEB_USER}
-        - WEB_PASSWORD=${WEB_PASSWORD}
+        - TUNNEL_TRANSPORT_PROTOCOL=${TUNNEL_TRANSPORT_PROTOCOL:-http2}
+        - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH:-true}
+        - WEB_USER=${WEB_USER:-user}
+        - WEB_PASSWORD=${WEB_PASSWORD:-true}
         # - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}

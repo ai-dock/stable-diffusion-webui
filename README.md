@@ -135,24 +135,26 @@ You can use the included `cloudflared` service to make secure connections withou
 
 ## Environment Variables
 
-| Variable              | Description |
-| --------------------- | ----------- |
-| `CF_TUNNEL_TOKEN`     | Cloudflare zero trust tunnel token - See [documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). |
-| `CF_QUICK_TUNNELS`    | Create ephemeral Cloudflare tunnels for web services (default `false`) |
-| `WEBUI_BRANCH`        | WebUI branch/commit hash. Defaults to `master` |
-| `WEBUI_FLAGS`         | Startup flags. eg. `--no-half` |
-| `WEBUI_PORT`          | WebUI port (default `7860`) |
-| `GPU_COUNT`           | Limit the number of available GPUs |
-| `PROVISIONING_SCRIPT` | URL of a remote script to execute on init. See [note](#provisioning-script). |
-| `RCLONE_*`            | Rclone configuration - See [rclone documentation](https://rclone.org/docs/#config-file) |
-| `SKIP_ACL`            | Set `true` to skip modifying workspace ACL |
-| `SSH_PORT`            | Set a non-standard port for SSH (default `22`) |
-| `SSH_PUBKEY`          | Your public key for SSH |
-| `WEB_ENABLE_AUTH`     | Enable password protection for web services (default `true`) |
-| `WEB_USER`            | Username for web services (default `user`) |
-| `WEB_PASSWORD`        | Password for web services (default `password`) |
-| `WORKSPACE`           | A volume path. Defaults to `/workspace/` |
-| `WORKSPACE_SYNC`      | Move mamba environments and services to workspace if mounted (default `true`) |
+| Variable                 | Description |
+| ------------------------ | ----------- |
+| `CF_TUNNEL_TOKEN`        | Cloudflare zero trust tunnel token - See [documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). |
+| `CF_QUICK_TUNNELS`       | Create ephemeral Cloudflare tunnels for web services (default `false`) |
+| `DIRECT_ADDRESS`         | IP/hostname for service portal direct links (default `localhost`) |
+| `DIRECT_ADDRESS_GET_WAN` | Use the internet facing interface for direct links (default `false`) |
+| `WEBUI_BRANCH`           | WebUI branch/commit hash. Defaults to `master` |
+| `WEBUI_FLAGS`            | Startup flags. eg. `--no-half` |
+| `WEBUI_PORT`             | WebUI port (default `7860`) |
+| `GPU_COUNT`              | Limit the number of available GPUs |
+| `PROVISIONING_SCRIPT`    | URL of a remote script to execute on init. See [note](#provisioning-script). |
+| `RCLONE_*`               | Rclone configuration - See [rclone documentation](https://rclone.org/docs/#config-file) |
+| `SKIP_ACL`               | Set `true` to skip modifying workspace ACL |
+| `SSH_PORT`               | Set a non-standard port for SSH (default `22`) |
+| `SSH_PUBKEY`             | Your public key for SSH |
+| `WEB_ENABLE_AUTH`        | Enable password protection for web services (default `true`) |
+| `WEB_USER`               | Username for web services (default `user`) |
+| `WEB_PASSWORD`           | Password for web services (default `password`) |
+| `WORKSPACE`              | A volume path. Defaults to `/workspace/` |
+| `WORKSPACE_SYNC`         | Move mamba environments and services to workspace if mounted (default `true`) |
 
 Environment variables can be specified by using any of the standard methods (`docker-compose.yaml`, `docker run -e...`). Additionally, environment variables can also be passed as parameters of `init.sh`.
 
@@ -171,6 +173,9 @@ You can set your credentials by passing environment variables as shown above.
 The password is stored as a bcrypt hash. If you prefer not to pass a plain text password to the container you can pre-hash and use the variable `WEB_PASSWORD_HASH`.
 
 If you are running the image locally on a trusted network, you may disable authentication by setting the environment variable `WEB_ENABLE_AUTH=false`.
+
+>[!NOTE]  
+>You can use `set-web-credentials.sh <username> <password>` change the username and password in a running container.
 
 ## Provisioning script
 
@@ -225,9 +230,7 @@ __VAE__
 - vae-ft-mse-840000-ema-pruned.safetensors
 - sdxl_vae.safetensors
 
-
 Remember, you do not have to use this script - Just set `PROVISIONING_SCRIPT=https://example.com/your-script.sh`.
-
 
 >[!NOTE]  
 >If configured, `sshd`, `caddy`, `cloudflared`, `rclone`, `port redirector` & `logtail` will be launched before provisioning; Any other processes will launch after.
@@ -327,7 +330,7 @@ This is a simple webserver acting as a reverse proxy.
 
 Caddy is used to enable basic authentication for all sensitive web services.
 
-### Port Redirector
+### Service Portal
 
 This is a simple list of links to the web services available inside the container.
 
@@ -335,16 +338,7 @@ The service will bind to port `1111`.
 
 For each service, you will find a direct link and, if you have set `CF_QUICK_TUNNELS=true`, a link to the service via a fast and secure Cloudflare tunnel.
 
->[!NOTE]  
->*This service will not show links to any pre-configured Cloudflare tunnels as the domains are static and already known to the user.*
-
-### Log Viewer
-
-The web based log viewer will start on port `1122`.
-
-It's a very lightweight websocket based stream of the latest updates in `/var/log/logtail.log`.
-
-This service will also be accessible on any other exposed ports until the program designated to that port is ready to use.
+A simple web-based log viewer and process manager are included for convenience.
 
 ### Cloudflared
 
@@ -428,8 +422,7 @@ Some ports need to be exposed for the services to run or for certain features of
 | Open Port             | Service / Description     |
 | --------------------- | ------------------------- |
 | `22`                  | SSH server                |
-| `1111`                | Port redirector web UI    |
-| `1122`                | Log viewer web UI         |
+| `1111`                | Service Portal web UI     |
 | `7860`                | Stable Diffusion WebUI    |
 | `53682`               | Rclone interactive config |
 
