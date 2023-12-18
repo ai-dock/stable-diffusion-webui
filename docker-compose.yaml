@@ -5,11 +5,11 @@ services:
     build:
       context: ./build
       args:
-        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:latest-cuda}
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:2.1.1-py3.10-cuda-11.8.0-base-22.04}
       tags:
-        - "ghcr.io/ai-dock/webui:${IMAGE_TAG:-latest-jupyter}"
+        - "ghcr.io/ai-dock/webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04}"
         
-    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-latest-jupyter}
+    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04}
     
     security_opt:
       # For Rclone mount
@@ -40,6 +40,8 @@ services:
       - ./config/rclone:/etc/rclone
       # Workspace
       - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      # You can share /workspace/storage with other non-WEBUI containers. See README
+      #- /path/to/common_storage:${WORKSPACE:-/workspace/}storage/:rshared
       # Will echo to root-owned authorized_keys file;
       # Avoids changing local file owner
       - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
@@ -47,31 +49,38 @@ services:
     
     ports:
         # SSH available on host machine port 2222 to avoid conflict. Change to suit
-        - ${SSH_PORT_HOST:-2222}:${SSH_PORT:-22}
-        # redirect to Cloudflare quick tunnel
-        - ${REDIRECTOR_PORT_HOST}:1111
-        # A1111 web interface
-        - ${WEBUI_PORT_HOST:-7860}:${WEBUI_PORT:-7860}
+        - ${SSH_PORT_HOST:-2222}:${SSH_PORT_LOCAL:-22}
+        # Caddy port for service portal
+        - ${SERVICEPORTAL_PORT_HOST:-1111}:${SERVICEPORTAL_PORT_HOST:-1111}
+        # WEBUI web interface
+        - ${WEBUI_PORT_HOST:-7860}:${WEBUI_PORT_HOST:-7860}
         # Jupyter server
-        - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT:-8888}
+        - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT_HOST:-8888}
         # Rclone webserver for interactive configuration
-        - ${RCLONE_PORT_HOST:-53682}:53682
+        - ${RCLONE_PORT_HOST:-53682}:${RCLONE_PORT_HOST:-53682}
    
     environment:
         # Don't enclose values in quotes
-        - AUTO_UPDATE=${AUTO_UPDATE:-true}
-        - WEBUI_BRANCH=${WEBUI_BRANCH:-master}
-        - WEBUI_FLAGS=${WEBUI_FLAGS:-}
-        - WEBUI_PORT=${WEBUI_PORT:-7860}
         - DIRECT_ADDRESS=${DIRECT_ADDRESS:-127.0.0.1}
         - DIRECT_ADDRESS_GET_WAN=${DIRECT_ADDRESS_GET_WAN:-false}
-        - SSH_PORT=${SSH_PORT:-22}
         - WORKSPACE=${WORKSPACE:-/workspace}
-        - WORKSPACE_SYNC=${WORKSPACE_SYNC:-true}
+        - WORKSPACE_SYNC=${WORKSPACE_SYNC:-false}
         - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
         - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
-        - TUNNEL_TRANSPORT_PROTOCOL=${TUNNEL_TRANSPORT_PROTOCOL:-http2}
         - WEB_ENABLE_AUTH=${WEB_ENABLE_AUTH:-true}
         - WEB_USER=${WEB_USER:-user}
-        - WEB_PASSWORD=${WEB_PASSWORD:-true}
+        - WEB_PASSWORD=${WEB_PASSWORD:-password}
+        - SSH_PORT_HOST=${SSH_PORT_HOST:-2222}
+        - SSH_PORT_LOCAL=${SSH_PORT_LOCAL:-22}
+        - SERVICEPORTAL_PORT_HOST=${SERVICEPORTAL_PORT_HOST:-1111}
+        - SERVICEPORTAL_PORT_LOCAL=${SERVICEPORTAL_PORT_LOCAL:-11111}
+        - SERVICEPORTAL_METRICS_PORT=${SERVICEPORTAL_METRICS_PORT:-21111}
+        - WEBUI_FLAGS=${WEBUI_FLAGS:-}
+        - WEBUI_PORT_HOST=${WEBUI_PORT_HOST:-7860}
+        - WEBUI_PORT_LOCAL=${WEBUI_PORT_LOCAL:-17860}
+        - WEBUI_METRICS_PORT=${WEBUI_METRICS_PORT:-27860}
+        - JUPYTER_PORT_HOST=${JUPYTER_PORT_HOST:-8888}
+        - JUPYTER_PORT_LOCAL=${JUPYTER_PORT_LOCAL:-18888}
+        - JUPYTER_METRICS_PORT=${JUPYTER_METRICS_PORT:-28888}
+        - SERVERLESS=${SERVERLESS:-false}
         # - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}

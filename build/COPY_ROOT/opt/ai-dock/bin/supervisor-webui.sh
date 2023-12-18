@@ -2,8 +2,8 @@
 
 trap cleanup EXIT
 
-LISTEN_PORT=17860
-METRICS_PORT=27860
+LISTEN_PORT=${WEBUI_PORT_LOCAL:-17860}
+METRICS_PORT=${WEBUI_METRICS_PORT:-27860}
 PROXY_SECURE=true
 
 function cleanup() {
@@ -12,10 +12,9 @@ function cleanup() {
 }
 
 function start() {
-    if [[ -z $WEBUI_PORT ]]; then
-        WEBUI_PORT=7860
+    if [[ ! -v WEBUI_PORT || -z $WEBUI_PORT ]]; then
+        WEBUI_PORT=${WEBUI_PORT_HOST:-8188}
     fi
-    
     PROXY_PORT=$WEBUI_PORT
     SERVICE_NAME="A1111 SD Web UI"
     
@@ -38,7 +37,7 @@ function start() {
         PLATFORM_FLAGS="--use-cpu all --skip-torch-cuda-test --no-half"
     fi
     # No longer skipping prepare-environment
-    BASE_FLAGS=
+    BASE_FLAGS=""
     
     # Delay launch until micromamba is ready
     if [[ -f /run/workspace_sync || -f /run/container_config ]]; then

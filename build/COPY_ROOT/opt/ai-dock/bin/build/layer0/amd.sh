@@ -1,13 +1,10 @@
-#!/bin/bash
+#!/bin/false
 
-# Must exit and fail to build if any command fails
-set -eo pipefail
-
-main() {
-    install_webui
+build_amd_main() {
+    build_amd_install_webui
 }
 
-install_webui() {
+build_amd_install_webui() {
   # Mamba export does not include pip packages.
   # We need to get torch again - todo find a better way?
     micromamba -n webui run pip install \
@@ -17,4 +14,4 @@ install_webui() {
     /opt/ai-dock/bin/update-webui.sh
 }
 
-main "$@"; exit
+build_amd_main "$@"

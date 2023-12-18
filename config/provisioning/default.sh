@@ -4,9 +4,18 @@
 
 # https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/default.sh
 
-### Edit the following arrays to suit your workflow
+### Edit the following arrays to suit your workflow - values must be quoted and separated by newlines or spaces.
 
 DISK_GB_REQUIRED=30
+
+MAMBA_PACKAGES=(
+    #"package1"
+    #"package2=version"
+  )
+  
+PIP_PACKAGES=(
+    "bitsandbytes==0.41.2.post2"
+  )
 
 EXTENSIONS=(
     "https://github.com/Mikubill/sd-webui-controlnet"
@@ -67,27 +76,54 @@ CONTROLNET_MODELS=(
 ### DO NOT EDIT BELOW HERE UNLESS YOU KNOW WHAT YOU ARE DOING ###
 
 function provisioning_start() {
+    source /opt/ai-dock/etc/environment.sh
     DISK_GB_AVAILABLE=$(($(df --output=avail -m "${WORKSPACE}" | tail -n1) / 1000))
     DISK_GB_USED=$(($(df --output=used -m "${WORKSPACE}" | tail -n1) / 1000))
     DISK_GB_ALLOCATED=$(($DISK_GB_AVAILABLE + $DISK_GB_USED))
     provisioning_print_header
+    provisioning_get_mamba_packages
+    provisioning_get_pip_packages
     provisioning_get_extensions
     provisioning_get_models \
-        "/opt/stable-diffusion-webui/models/Stable-diffusion" \
+        "${WORKSPACE}/storage/stable_diffusion/models/ckpt" \
         "${CHECKPOINT_MODELS[@]}"
     provisioning_get_models \
-        "/opt/stable-diffusion-webui/models/Lora" \
+        "${WORKSPACE}/storage/stable_diffusion/models/lora" \
         "${LORA_MODELS[@]}"
     provisioning_get_models \
-        "/opt/stable-diffusion-webui/extensions/sd-webui-controlnet/models" \
+        "${WORKSPACE}/storage/stable_diffusion/models/controlnet" \
         "${CONTROLNET_MODELS[@]}"
     provisioning_get_models \
-        "/opt/stable-diffusion-webui/models/VAE" \
+        "${WORKSPACE}/storage/stable_diffusion/models/vae" \
         "${VAE_MODELS[@]}"
     provisioning_get_models \
-        "/opt/stable-diffusion-webui/models/ESRGAN" \
+        "${WORKSPACE}/storage/stable_diffusion/models/esrgan" \
         "${ESRGAN_MODELS[@]}"
+     
+    PLATFORM_FLAGS=""
+    if [[ $XPU_TARGET = "CPU" ]]; then
+        PLATFORM_FLAGS="--use-cpu all --skip-torch-cuda-test --no-half"
+    fi
+    PROVISIONING_FLAGS="--skip-python-version-check --no-download-sd-model --do-not-download-clip --port 11404 --exit"
+    FLAGS_COMBINED="${PLATFORM_FLAGS} $(cat /etc/a1111_webui_flags.conf) ${PROVISIONING_FLAGS}"
+    
+    # Start and exit because webui will probably require a restart
+    cd /opt/stable-diffusion-webui && \
+    micromamba run -n webui -e LD_PRELOAD=libtcmalloc.so python launch.py \
+        ${FLAGS_COMBINED}
     provisioning_print_end
+}
+
+function provisioning_get_mamba_packages() {
+    if [[ -n $MAMBA_PACKAGES ]]; then
+        $MAMBA_INSTALL -n webui ${MAMBA_PACKAGES[@]}
+    fi
+}
+
+function provisioning_get_pip_packages() {
+    if [[ -n $PIP_PACKAGES ]]; then
+        micromamba run -n webui $PIP_INSTALL ${PIP_PACKAGES[@]}
+    fi
 }
 
 function provisioning_get_extensions() {
@@ -105,7 +141,7 @@ function provisioning_get_extensions() {
             fi
         else
             printf "Downloading extension: %s...\n" "${repo}"
-            git clone "${repo}" "${path}"
+            git clone "${repo}" "${path}" --recursive
             if [[ -e $requirements ]]; then
                 micromamba -n webui run ${PIP_INSTALL} -r "${requirements}"
             fi

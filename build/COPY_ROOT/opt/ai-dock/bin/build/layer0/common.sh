@@ -1,21 +1,15 @@
-#!/bin/bash
+#!/bin/false
 
-# Must exit and fail to build if any command fails
-set -eo pipefail
-
+source /opt/ai-dock/etc/environment.sh
 webui_git="https://github.com/AUTOMATIC1111/stable-diffusion-webui"
 
-main() {
-    create_env
-    install_jupyter_kernels
-    clone_webui
+build_common_main() {
+    build_common_create_env
+    build_common_install_jupyter_kernels
+    build_common_clone_webui
 }
 
-create_env() {
-    if [[ $PYTHON_VERSION == "3.10" ]]; then
-        $MAMBA_INSTALL -n ${MAMBA_DEFAULT_ENV} -c conda-forge -y \
-            python==3.10.6
-    fi
+build_common_create_env() {
     apt-get update
     $APT_INSTALL libgl1 libgoogle-perftools4
     ln -sf $(ldconfig -p | grep -Po "libtcmalloc.so.\d" | head -n 1) \
@@ -24,13 +18,13 @@ create_env() {
     exported_env=/tmp/${MAMBA_DEFAULT_ENV}.yaml
     micromamba env export -n ${MAMBA_DEFAULT_ENV} > "${exported_env}"
     $MAMBA_CREATE -n webui --file "${exported_env}"
-    $MAMBA_INSTALL -n webui -c conda-forge -y \
+    $MAMBA_INSTALL -n webui \
         httpx=0.24.1
 }
 
-install_jupyter_kernels() {
+build_common_install_jupyter_kernels() {
     if [[ $IMAGE_BASE =~ "jupyter-pytorch" ]]; then
-        $MAMBA_INSTALL -n webui -c conda-forge -y \
+        $MAMBA_INSTALL -n webui \
             ipykernel \
             ipywidgets
         
@@ -52,9 +46,9 @@ install_jupyter_kernels() {
     fi
 }
 
-clone_webui() {
+build_common_clone_webui() {
     cd /opt
     git clone ${webui_git}
 }
 
-main "$@"; exit
+build_common_main "$@"

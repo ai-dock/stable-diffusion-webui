@@ -48,33 +48,58 @@ Tags follow these patterns:
 ##### _CUDA_
 - `:pytorch-[pytorch-version]-py[python-version]-cuda-[x.x.x]-base-[ubuntu-version]`
 
-- `:latest-cuda` &rarr; `:pytorch-2.0.1-py3.10-cuda-11.8.0-base-22.04`
+- `:latest-cuda` &rarr; `:pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04`
 
-- `:latest-cuda-jupyter` &rarr; `:jupyter-pytorch-2.0.1-py3.10-cuda-11.8.0-base-22.04`
+- `:latest-cuda-jupyter` &rarr; `:jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04`
 
 ##### _ROCm_
 - `:pytorch-[pytorch-version]-py[python-version]-rocm-[x.x.x]-runtime-[ubuntu-version]`
 
-- `:latest-rocm` &rarr; `:pytorch-2.0.1-py3.10-rocm-5.4.2-runtime-22.04`
+- `:latest-rocm` &rarr; `:pytorch-2.1.1-py3.10-rocm-5.4.2-runtime-22.04`
 
-- `:latest-rocm-jupyter` &rarr; `:jupyter-pytorch-2.0.1-py3.10-rocm-5.4.2-runtime-22.04`
+- `:latest-rocm-jupyter` &rarr; `:jupyter-pytorch-2.1.1-py3.10-rocm-5.4.2-runtime-22.04`
 
 ##### _CPU_
 - `:pytorch-[pytorch-version]-py[python-version]-ubuntu-[ubuntu-version]`
 
-- `:latest-cpu` &rarr; `:pytorch-2.0.1-py3.10-cpu-22.04` 
+- `:latest-cpu` &rarr; `:pytorch-2.1.1-py3.10-cpu-22.04` 
 
-- `:latest-cpu-jupyter` &rarr; `:jupyter-pytorch-2.0.1-py3.10-cpu-22.04` 
+- `:latest-cpu-jupyter` &rarr; `:jupyter-pytorch-2.1.1-py3.10-cpu-22.04` 
 
 Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment.
 
-You can also self-build from source by editing `.env` and running `docker compose build`.
+You can also [build from source](#building-images) by editing `.env` and running `docker compose build`.
 
 Supported Python versions: `3.10`
 
-Supported Pytorch versions: `2.0.1`
+Supported Pytorch versions: `2.1.1` `2.0.1`
 
 Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
+
+## Building Images
+
+You can self-build from source by editing `docker-compose.yaml` or `.env` and running `docker compose build`. 
+
+It is a good idea to leave the main source tree alone and copy any extra files you would like in the container into `build/COPY_ROOT_EXTRA/...`. The structure within this directory will be overlayed on `/` near the end of the build process.
+
+After copying has been completed, the script `build/COPY_ROOT_EXTRA/opt/ai-dock/bin/build/layer1/init.sh` will be executed. A template for this file capable of downloading models and nodes is provided for convenience.
+
+Any directories and files that you add into `opt/storage` will be made available in the running container at `$WORKSPACE/storage` through symbolic links.  
+
+This directory is monitored by `inotifywait`. Any items appearing here will be automatically symlinked to the application directories as defined in `/opt/ai-dock/storage_monitor/etc/mappings.sh`.
+
+### Recommended workflow
+
+- Fork this repository and clone
+- Create and switch to a new branch
+- Create `.env` to override the `IMAGE_TAG` and other variables
+- Copy non-public models to `build/COPY_ROOT_EXTRA/opt/storage/stable_diffusion/ckpt/`
+- Edit `build/COPY_ROOT_EXTRA/opt/ai-dock/bin/build/layer1/init.sh` to download public models and extensions
+- Run `docker compose build`
+- Run `docker compose push`
+
+>[!NOTE]  
+>The GitHub actions in this repository will also build the image if you push changes to the `main` branch of your fork.  You should edit the actions script to avoid building for platforms you don't need.
 
 ## Run Locally
 
@@ -143,18 +168,17 @@ You can use the included `cloudflared` service to make secure connections withou
 | `DIRECT_ADDRESS_GET_WAN` | Use the internet facing interface for direct links (default `false`) |
 | `WEBUI_BRANCH`           | WebUI branch/commit hash. Defaults to `master` |
 | `WEBUI_FLAGS`            | Startup flags. eg. `--no-half` |
-| `WEBUI_PORT`             | WebUI port (default `7860`) |
-| `GPU_COUNT`              | Limit the number of available GPUs |
+| `WEBUI_PORT_HOST`        | WebUI port (default `7860`) |
 | `PROVISIONING_SCRIPT`    | URL of a remote script to execute on init. See [note](#provisioning-script). |
 | `RCLONE_*`               | Rclone configuration - See [rclone documentation](https://rclone.org/docs/#config-file) |
 | `SKIP_ACL`               | Set `true` to skip modifying workspace ACL |
-| `SSH_PORT`               | Set a non-standard port for SSH (default `22`) |
+| `SSH_PORT_HOST`          | Set a non-standard port for SSH (default `22`) |
 | `SSH_PUBKEY`             | Your public key for SSH |
 | `WEB_ENABLE_AUTH`        | Enable password protection for web services (default `true`) |
 | `WEB_USER`               | Username for web services (default `user`) |
 | `WEB_PASSWORD`           | Password for web services (default `password`) |
 | `WORKSPACE`              | A volume path. Defaults to `/workspace/` |
-| `WORKSPACE_SYNC`         | Move mamba environments and services to workspace if mounted (default `true`) |
+| `WORKSPACE_SYNC`         | Move mamba environments and services to workspace if mounted (default `false`) |
 
 Environment variables can be specified by using any of the standard methods (`docker-compose.yaml`, `docker run -e...`). Additionally, environment variables can also be passed as parameters of `init.sh`.
 
@@ -198,16 +222,19 @@ This script will download & install the following:
 __Models__
 
 - Stable Diffusion 1.5
-- Stable Diffusion 2.1
 - Stable Diffusion XL
 - Stable Diffusion XL Refiner
 
 __Extensions__
 
 - Controlnet
+- Deforum
+- Dreambooth
 - Dynamic Prompts
 - Face Editor
 - Image Browser
+- Openpose Editor
+- ReActor
 - Regional Prompter
 - Ultimate Upscale
 
@@ -233,7 +260,7 @@ __VAE__
 Remember, you do not have to use this script - Just set `PROVISIONING_SCRIPT=https://example.com/your-script.sh`.
 
 >[!NOTE]  
->If configured, `sshd`, `caddy`, `cloudflared`, `rclone`, `port redirector` & `logtail` will be launched before provisioning; Any other processes will launch after.
+>If configured, `sshd`, `caddy`, `cloudflared`, `rclone`, `serviceportal`, `storagemonitor` & `logtail` will be launched before provisioning; Any other processes will launch after.
 
 >[!WARNING]  
 >Only use scripts that you trust and which cannot be changed without your consent.
@@ -289,6 +316,15 @@ To ensure that the files remain accessible to the local user that owns the direc
 
 If you do not want this, you can set the environment variable `SKIP_ACL=true`.
 
+## Workspace Sync
+
+When run with `WORKSPACE_SYNC=true` the container will move the micomamba environments and application directories into your workspace directory.
+
+This allows you to maintain state even after destroying containers.  This is useful in cloud environments but is likely unnecessary when running locally.
+
+>[!WARNING]  
+>A synced environment will not be upgraded when deploying an updated docker image.  You must manually upgrade your packages or remove the synced environment.
+
 ## Running Services
 
 This image will spawn multiple processes upon starting a container because some of our remote environments do not support more than one container per instance.
@@ -308,9 +344,6 @@ You can set startup flags by using variable `WEBUI_FLAGS`.
 
 To manage this service you can use `supervisorctl [start|stop|restart] webui`.
 
->[!NOTE]  
->_If you have enabled `CF_QUICK_TUNNELS` a secure `https://[random-auto-generated-sub-domain].trycloudflare.com` link will be created. You can find it at `/var/log/supervisor/quicktunnel-webui.log`_
-
 ### Jupyter (with tag `jupyter` only)
 
 The jupyter server will launch a `lab` instance unless you specify `JUPYTER_MODE=notebook`.
@@ -320,9 +353,6 @@ Jupyter server will listen on port `8888` unless you have specified an alternati
 A python kernel will be installed coresponding with the python version of the image.
 
 Jupyter's official documentation is available at https://jupyter.org/
-
->[!NOTE]  
->_If you have enabled `CF_QUICK_TUNNELS` a secure `https://[random-auto-generated-sub-domain].trycloudflare.com` link will be created. You can find it at `/var/log/supervisor/quicktunnel-jupyter.log`_
 
 ### Caddy
 
@@ -349,6 +379,8 @@ This service allows you to connect to your local services via https without expo
 You can also create a private network to enable remote connecions to the container at its local address (`172.x.x.x`) if your local machine is running a Cloudflare WARP client.
 
 If you do not wish to provide a tunnel token, you could enable `CF_QUICK_TUNNELS` which will create a throwaway tunnel for your web services.
+
+Secure links can be found in the [service portal](#service-portal) and in the log files at `/var/log/supervisor/quicktunnel-*.log`.
 
 Full documentation for Cloudflare tunnels is [here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
 
@@ -414,6 +446,10 @@ This script follows and prints the log files for each of the above services to s
 
 If you are logged into the container you can follow the logs by running `logtail.sh` in your shell.
 
+### Storage Monitor
+
+This service detects changes to files in `$WORKSPACE/storage` and creates symbolic links to the application directories defined in `/opt/ai-dock/storage_monitor/etc/mappings.sh`
+
 ## Open Ports
 
 Some ports need to be exposed for the services to run or for certain features of the provided software to function
@@ -449,7 +485,6 @@ Some ports need to be exposed for the services to run or for certain features of
 - Create a [new notebook](https://link.ai-dock.org/console.paperspace.com) with the `Start from Scratch` template.
 - Select `Advanced options`
 - In Container Name enter `ghcr.io/ai-dock/stable-diffusion-webui:latest-jupyter`
-- In Registry Username enter `x` (Paperspace bug)
 - In Command enter `init.sh WORKSPACE=/notebooks PROVISIONING_SCRIPT="https://raw.githubusercontent.com/ai-dock/stable-diffusion-webui/main/config/provisioning/default.sh" WEBUI_FLAGS="--xformers" CF_QUICK_TUNNELS=true`
 
 You can use the web UI to do further configuration, or you can supply further environment variables as detailed above.

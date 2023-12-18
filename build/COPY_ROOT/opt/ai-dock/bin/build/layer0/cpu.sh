@@ -1,14 +1,11 @@
-#!/bin/bash
+#!/bin/false
 
-# Must exit and fail to build if any command fails
-set -e
-
-main() {
-    install_webui
+build_cpu_main() {
+    build_cpu_install_webui
 }
 
-install_webui() {
+build_cpu_install_webui() {
     /opt/ai-dock/bin/update-webui.sh
 }
 
-main "$@"; exit
+build_cpu_main "$@"

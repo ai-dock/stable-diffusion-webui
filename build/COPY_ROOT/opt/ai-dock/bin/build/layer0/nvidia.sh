@@ -1,19 +1,17 @@
-#!/bin/bash
+#!/bin/false
 
-# Must exit and fail to build if any command fails
-set -eo pipefail
-
-main() {
-    install_webui
+build_nvidia_main() {
+    build_nvidia_install_webui
 }
 
-install_webui() {
+build_nvidia_install_webui() {
     micromamba run -n webui ${PIP_INSTALL} \
         torch=="${PYTORCH_VERSION}" \
-        xformers \
         nvidia-ml-py3
+        
+    micromamba install -n webui -c xformers xformers
 
     /opt/ai-dock/bin/update-webui.sh
 }
 
-main "$@"; exit
+build_nvidia_main "$@"
