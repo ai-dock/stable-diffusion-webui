@@ -5,6 +5,7 @@ trap cleanup EXIT
 LISTEN_PORT=${WEBUI_PORT_LOCAL:-17860}
 METRICS_PORT=${WEBUI_METRICS_PORT:-27860}
 PROXY_SECURE=true
+QUICKTUNNELS=true
 
 function cleanup() {
     kill $(jobs -p) > /dev/null 2>&1
@@ -41,7 +42,7 @@ function start() {
     
     # Delay launch until micromamba is ready
     if [[ -f /run/workspace_sync || -f /run/container_config ]]; then
-        kill $(lsof -t -i:$LISTEN_PORT) > /dev/null 2>&1 &
+        fuser -k -SIGTERM ${LISTEN_PORT}/tcp > /dev/null 2>&1 &
         wait -n
         /usr/bin/python3 /opt/ai-dock/fastapi/logviewer/main.py \
             -p $LISTEN_PORT \
@@ -58,7 +59,7 @@ function start() {
         wait $fastapi_pid 2>/dev/null
     fi
     
-    kill $(lsof -t -i:$LISTEN_PORT) > /dev/null 2>&1 &
+    fuser -k -SIGKILL ${LISTEN_PORT}/tcp > /dev/null 2>&1 &
     wait -n
     
     FLAGS_COMBINED="${PLATFORM_FLAGS} ${BASE_FLAGS} $(cat /etc/a1111_webui_flags.conf)"

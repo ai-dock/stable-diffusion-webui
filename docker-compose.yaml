@@ -5,39 +5,18 @@ services:
     build:
       context: ./build
       args:
-        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:2.1.1-py3.10-cuda-11.8.0-base-22.04}
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:2.1.1-py3.10-cuda-11.8.0-runtime-22.04}
       tags:
-        - "ghcr.io/ai-dock/webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04}"
+        - "ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-runtime-22.04}"
         
-    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04}
-    
-    security_opt:
-      # For Rclone mount
-      - apparmor:unconfined
-      # For AMD GPU
-      #- seccomp:unconfined
-    
-    cap_add:
-      # For Rclone mount
-      - SYS_ADMIN
+    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-runtime-22.04}
     
     devices:
-      # For Rclone mount
-      - "/dev/fuse:/dev/fuse"
+      - "/dev/dri:/dev/dri"
       # For AMD GPU
       #- "/dev/kfd:/dev/kfd"
-      #- "/dev/dri:/dev/dri"
-      
-    # For AMD GPU
-    #group_add:
-    #  - video
-    #  - render
     
     volumes:
-      # For Rclone mount
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/group:/etc/group:ro
-      - ./config/rclone:/etc/rclone
       # Workspace
       - ./workspace:${WORKSPACE:-/workspace/}:rshared
       # You can share /workspace/storage with other non-WEBUI containers. See README
@@ -73,14 +52,12 @@ services:
         - SSH_PORT_HOST=${SSH_PORT_HOST:-2222}
         - SSH_PORT_LOCAL=${SSH_PORT_LOCAL:-22}
         - SERVICEPORTAL_PORT_HOST=${SERVICEPORTAL_PORT_HOST:-1111}
-        - SERVICEPORTAL_PORT_LOCAL=${SERVICEPORTAL_PORT_LOCAL:-11111}
         - SERVICEPORTAL_METRICS_PORT=${SERVICEPORTAL_METRICS_PORT:-21111}
         - WEBUI_FLAGS=${WEBUI_FLAGS:-}
         - WEBUI_PORT_HOST=${WEBUI_PORT_HOST:-7860}
         - WEBUI_PORT_LOCAL=${WEBUI_PORT_LOCAL:-17860}
         - WEBUI_METRICS_PORT=${WEBUI_METRICS_PORT:-27860}
         - JUPYTER_PORT_HOST=${JUPYTER_PORT_HOST:-8888}
-        - JUPYTER_PORT_LOCAL=${JUPYTER_PORT_LOCAL:-18888}
         - JUPYTER_METRICS_PORT=${JUPYTER_METRICS_PORT:-28888}
         - SERVERLESS=${SERVERLESS:-false}
         # - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}

@@ -48,23 +48,23 @@ Tags follow these patterns:
 ##### _CUDA_
 - `:pytorch-[pytorch-version]-py[python-version]-cuda-[x.x.x]-base-[ubuntu-version]`
 
-- `:latest-cuda` &rarr; `:pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04`
+- `:latest-cuda` &rarr; `:pytorch-2.2.0-py3.10-cuda-11.8.0-base-22.04`
 
-- `:latest-cuda-jupyter` &rarr; `:jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-base-22.04`
+- `:latest-cuda-jupyter` &rarr; `:jupyter-pytorch-2.2.0-py3.10-cuda-11.8.0-base-22.04`
 
 ##### _ROCm_
 - `:pytorch-[pytorch-version]-py[python-version]-rocm-[x.x.x]-runtime-[ubuntu-version]`
 
-- `:latest-rocm` &rarr; `:pytorch-2.1.1-py3.10-rocm-5.4.2-runtime-22.04`
+- `:latest-rocm` &rarr; `:pytorch-2.2.0-py3.10-rocm-5.7-runtime-22.04`
 
-- `:latest-rocm-jupyter` &rarr; `:jupyter-pytorch-2.1.1-py3.10-rocm-5.4.2-runtime-22.04`
+- `:latest-rocm-jupyter` &rarr; `:jupyter-pytorch-2.2.0-py3.10-rocm-5.7-runtime-22.04`
 
 ##### _CPU_
 - `:pytorch-[pytorch-version]-py[python-version]-ubuntu-[ubuntu-version]`
 
-- `:latest-cpu` &rarr; `:pytorch-2.1.1-py3.10-cpu-22.04` 
+- `:latest-cpu` &rarr; `:pytorch-2.2.0-py3.10-cpu-22.04` 
 
-- `:latest-cpu-jupyter` &rarr; `:jupyter-pytorch-2.1.1-py3.10-cpu-22.04` 
+- `:latest-cpu-jupyter` &rarr; `:jupyter-pytorch-2.2.0-py3.10-cpu-22.04` 
 
 Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment.
 
@@ -72,7 +72,7 @@ You can also [build from source](#building-images) by editing `.env` and running
 
 Supported Python versions: `3.10`
 
-Supported Pytorch versions: `2.1.1` `2.0.1`
+Supported Pytorch versions: `2.2.0`, `2.1.2` `2.1.1`
 
 Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
 
@@ -163,7 +163,7 @@ You can use the included `cloudflared` service to make secure connections withou
 | Variable                 | Description |
 | ------------------------ | ----------- |
 | `CF_TUNNEL_TOKEN`        | Cloudflare zero trust tunnel token - See [documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). |
-| `CF_QUICK_TUNNELS`       | Create ephemeral Cloudflare tunnels for web services (default `false`) |
+| `CF_QUICK_TUNNELS`       | Create ephemeral Cloudflare tunnels for web services (default `true`) |
 | `DIRECT_ADDRESS`         | IP/hostname for service portal direct links (default `localhost`) |
 | `DIRECT_ADDRESS_GET_WAN` | Use the internet facing interface for direct links (default `false`) |
 | `WEBUI_BRANCH`           | WebUI branch/commit hash. Defaults to `master` |
@@ -172,11 +172,12 @@ You can use the included `cloudflared` service to make secure connections withou
 | `PROVISIONING_SCRIPT`    | URL of a remote script to execute on init. See [note](#provisioning-script). |
 | `RCLONE_*`               | Rclone configuration - See [rclone documentation](https://rclone.org/docs/#config-file) |
 | `SKIP_ACL`               | Set `true` to skip modifying workspace ACL |
-| `SSH_PORT_HOST`          | Set a non-standard port for SSH (default `22`) |
 | `SSH_PUBKEY`             | Your public key for SSH |
+| `USER_NAME`              | System account username (default `user`)|
+| `USER_PASSWORD`          | System account username (default `password`)|
 | `WEB_ENABLE_AUTH`        | Enable password protection for web services (default `true`) |
 | `WEB_USER`               | Username for web services (default `user`) |
-| `WEB_PASSWORD`           | Password for web services (default `password`) |
+| `WEB_PASSWORD`           | Password for web services (default `auto generated`) |
 | `WORKSPACE`              | A volume path. Defaults to `/workspace/` |
 | `WORKSPACE_SYNC`         | Move mamba environments and services to workspace if mounted (default `false`) |
 
@@ -188,18 +189,32 @@ Example usage: `docker run -e STANDARD_VAR1="this value" -e STANDARD_VAR2="that 
 
 ## Security
 
-By default, all exposed web services other than the port redirect page are protected by HTTP basic authentication.
+All ai-dock containers are interactive and will not drop root privileges. You should ensure that your docker daemon runs as an unprivileged user.
 
-The default username is `user` and the password is `password`.
+### System
+
+A system user will be created at startup. The UID will be either 1000 or will match the UID of the `$WORKSPACE` bind mount.
+
+The user will share the root user's ssh public key.
+
+Some processes may start in the user context for convenience only.
+
+### Web Services
+
+By default, all exposed web services are protected by a single login form at `:1111/login`.
+
+The default username is `user` and the password is auto generated unless you have passed a value in the environment variable `WEB_PASSWORD`. To find the auto-generated password and related tokens you should type `env | grep WEB_` from inside the container.
 
 You can set your credentials by passing environment variables as shown above.
 
-The password is stored as a bcrypt hash. If you prefer not to pass a plain text password to the container you can pre-hash and use the variable `WEB_PASSWORD_HASH`.
-
 If you are running the image locally on a trusted network, you may disable authentication by setting the environment variable `WEB_ENABLE_AUTH=false`.
 
+If you need to connect programmatically to the web services you can authenticate using either `Bearer $WEB_TOKEN` or `Basic $WEB_PASSWORD_B64`.
+
+The security measures included aim to be as secure as basic authentication, i.e. not secure without HTTPS.  Please use the provided cloudflare connections wherever possible.
+
 >[!NOTE]  
->You can use `set-web-credentials.sh <username> <password>` change the username and password in a running container.
+>You can use `set-web-credentials.sh <username> <password>` to change the username and password in a running container.
 
 ## Provisioning script
 
@@ -260,7 +275,7 @@ __VAE__
 Remember, you do not have to use this script - Just set `PROVISIONING_SCRIPT=https://example.com/your-script.sh`.
 
 >[!NOTE]  
->If configured, `sshd`, `caddy`, `cloudflared`, `rclone`, `serviceportal`, `storagemonitor` & `logtail` will be launched before provisioning; Any other processes will launch after.
+>If configured, `sshd`, `caddy`, `cloudflared`, `serviceportal`, `storagemonitor` & `logtail` will be launched before provisioning; Any other processes will launch after.
 
 >[!WARNING]  
 >Only use scripts that you trust and which cannot be changed without your consent.
@@ -412,33 +427,6 @@ See [this guide](https://link.ai-dock.org/guide-sshd-do) by DigitalOcean for an 
 
 >[!NOTE]  
 >_SSHD is included because the end-user should be able to know the version prior to deloyment. Using a providers add-on, if available, does not guarantee this._
-
-### Rclone mount
-
-Rclone allows you to access your cloud storage from within the container by configuring one or more remotes. If you are unfamiliar with the project you can find out more at the [Rclone website](https://rclone.org/).
-
-Any Rclone remotes that you have specified, either through mounting the config directory or via setting environment variables will be mounted at `/workspace/remote/[remote name]`. For this service to start, the following conditions must be met:
-
-- Fuse3 installed in the host operating system
-- Kernel module `fuse` loaded in the host
-- Host `/etc/passwd` mounted in the container
-- Host `/etc/group` mounted in the container
-- Host device `/dev/fuse` made available to the container
-- Container must run with `cap-add SYS_ADMIN`
-- Container must run with `securiry-opt apparmor:unconfined`
-- At least one remote must be configured
-
-The provided docker-compose.yaml includes a working configuration (add your own remotes).
-
-In the event that the conditions listed cannot be met, `rclone` will still be available to use via the CLI - only mounts will be unavailable.
-
-If you intend to use the `rclone create` command to interactively generate remote configurations you should ensure port `53682` is accessible. See https://rclone.org/remote_setup/ for further details.
-
->[!NOTE]  
->_Rclone is included to give the end-user an opportunity to easily transfer files between the instance and their cloud storage provider._
-
->[!WARNING]  
->You should only provide auth tokens in secure cloud environments.
 
 ### Logtail
 
