@@ -166,7 +166,6 @@ jobs:
         python:
           - "3.10"
         pytorch:
-          - "2.1.1"
           - "2.1.2"
           - "2.2.0"
         rocm:
@@ -175,8 +174,6 @@ jobs:
         level:
           - "runtime"
         exclude:
-          - rocm: "5.7"
-            pytorch: "2.1.1"
           - rocm: "5.7"
             pytorch: "2.1.2"
           - rocm: "5.6"
