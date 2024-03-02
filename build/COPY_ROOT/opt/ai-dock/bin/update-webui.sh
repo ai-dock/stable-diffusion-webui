@@ -1,5 +1,5 @@
 #!/bin/bash
-
+umask 002
 branch=master
 
 if [[ -n "${WEBUI_BRANCH}" ]]; then
@@ -13,7 +13,6 @@ do
         b) branch="$OPTARG";;
     esac
 done
-
 
 printf "Updating stable-diffusion-webui (${branch})...\n"
 
