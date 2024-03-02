@@ -18,7 +18,7 @@ services:
     
     volumes:
       # Workspace
-      #- ./workspace:${WORKSPACE:-/workspace/}:rshared
+      - ./workspace:${WORKSPACE:-/workspace/}:rshared
       # You can share /workspace/storage with other non-WEBUI containers. See README
       #- /path/to/common_storage:${WORKSPACE:-/workspace/}storage/:rshared
       # Will echo to root-owned authorized_keys file;
@@ -42,7 +42,7 @@ services:
         # Don't enclose values in quotes
         - DIRECT_ADDRESS=${DIRECT_ADDRESS:-127.0.0.1}
         - DIRECT_ADDRESS_GET_WAN=${DIRECT_ADDRESS_GET_WAN:-false}
-        #- WORKSPACE=${WORKSPACE:-/workspace}
+        - WORKSPACE=${WORKSPACE:-/workspace}
         - WORKSPACE_SYNC=${WORKSPACE_SYNC:-false}
         - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
         - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
