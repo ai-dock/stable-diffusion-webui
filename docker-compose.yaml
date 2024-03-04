@@ -2,14 +2,15 @@ version: "3.8"
 # Compose file build variables set in .env
 services:
   supervisor:
+    platform: linux/amd64
     build:
       context: ./build
       args:
-        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:2.1.1-py3.10-cuda-11.8.0-runtime-22.04}
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:2.2.1-py3.10-cuda-11.8.0-runtime-22.04}
       tags:
-        - "ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-runtime-22.04}"
+        - "ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.2.1-py3.10-cuda-11.8.0-runtime-22.04}"
         
-    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.1.1-py3.10-cuda-11.8.0-runtime-22.04}
+    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.2.1-py3.10-cuda-11.8.0-runtime-22.04}
     
     devices:
       - "/dev/dri:/dev/dri"
@@ -53,6 +54,7 @@ services:
         - SSH_PORT_LOCAL=${SSH_PORT_LOCAL:-22}
         - SERVICEPORTAL_PORT_HOST=${SERVICEPORTAL_PORT_HOST:-1111}
         - SERVICEPORTAL_METRICS_PORT=${SERVICEPORTAL_METRICS_PORT:-21111}
+        - WEBUI_BRANCH=${WEBUI_BRANCH:-}
         - WEBUI_FLAGS=${WEBUI_FLAGS:-}
         - WEBUI_PORT_HOST=${WEBUI_PORT_HOST:-7860}
         - WEBUI_PORT_LOCAL=${WEBUI_PORT_LOCAL:-17860}
@@ -60,4 +62,4 @@ services:
         - JUPYTER_PORT_HOST=${JUPYTER_PORT_HOST:-8888}
         - JUPYTER_METRICS_PORT=${JUPYTER_METRICS_PORT:-28888}
         - SERVERLESS=${SERVERLESS:-false}
-        # - PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
+        #- PROVISIONING_SCRIPT=${PROVISIONING_SCRIPT:-}
