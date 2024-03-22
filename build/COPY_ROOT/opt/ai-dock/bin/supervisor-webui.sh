@@ -4,7 +4,7 @@ trap cleanup EXIT
 
 LISTEN_PORT=${WEBUI_PORT_LOCAL:-17860}
 METRICS_PORT=${WEBUI_METRICS_PORT:-27860}
-PROXY_SECURE=true
+SERVICE_URL="${WEBUI_URL:-}"
 QUICKTUNNELS=true
 
 function cleanup() {
@@ -26,6 +26,7 @@ function start() {
         --arg proxy_port "${PROXY_PORT}" \
         --arg proxy_secure "${PROXY_SECURE,,}" \
         --arg service_name "${SERVICE_NAME}" \
+        --arg service_url "${SERVICE_URL}" \
         '$ARGS.named'
     )"
     
