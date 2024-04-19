@@ -5,7 +5,7 @@
 Run [Automatic1111 WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) in a docker container locally or in the cloud.
 
 >[!NOTE]  
->These images do not bundle models or third-party configurations. You should use a [provisioning script](#provisioning-script) to automatically configure your container. You can find examples in `config/provisioning`.
+>These images do not bundle models or third-party configurations. You should use a [provisioning script](https://github.com/ai-dock/base-image/wiki/4.0-Running-the-Image#provisioning-script) to automatically configure your container. You can find examples in `config/provisioning`.
 
 ## Documentation
 
@@ -21,31 +21,23 @@ The `:latest` tag points to `:latest-cuda`
 Tags follow these patterns:
 
 ##### _CUDA_
-- `:pytorch-[pytorch-version]-py[python-version]-cuda-[x.x.x]-base-[ubuntu-version]`
+- `:cuda-[x.x.x]-[base|runtime]-[ubuntu-version]`
 
-- `:latest-cuda` &rarr; `:pytorch-2.2.0-py3.10-cuda-11.8.0-base-22.04`
-
-- `:latest-cuda-jupyter` &rarr; `:jupyter-pytorch-2.2.0-py3.10-cuda-11.8.0-base-22.04`
+- `:latest-cuda` &rarr; `:cuda-11.8.0-base-22.04`
 
 ##### _ROCm_
-- `:pytorch-[pytorch-version]-py[python-version]-rocm-[x.x.x]-runtime-[ubuntu-version]`
+- `:rocm-[x.x.x]-runtime-[ubuntu-version]`
 
-- `:latest-rocm` &rarr; `:pytorch-2.2.0-py3.10-rocm-5.7-runtime-22.04`
-
-- `:latest-rocm-jupyter` &rarr; `:jupyter-pytorch-2.2.0-py3.10-rocm-5.7-runtime-22.04`
+- `:latest-rocm` &rarr; `:rocm-5.7-runtime-22.04`
 
 ##### _CPU_
-- `:pytorch-[pytorch-version]-py[python-version]-ubuntu-[ubuntu-version]`
+- `:cpu-ubuntu-[ubuntu-version]`
 
-- `:latest-cpu` &rarr; `:pytorch-2.2.0-py3.10-cpu-22.04` 
-
-- `:latest-cpu-jupyter` &rarr; `:jupyter-pytorch-2.2.0-py3.10-cpu-22.04` 
+- `:latest-cpu` &rarr; `:cpu-22.04` 
 
 Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment.
 
 Supported Python versions: `3.10`
-
-Supported Pytorch versions: `2.2.0`, `2.1.2`
 
 Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
 
@@ -53,8 +45,8 @@ Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
 
 | Variable                 | Description |
 | ------------------------ | ----------- |
-| `AUTO_UPDATE`            | Update A1111 Web UI on startup (default `true`) |
-| `WEBUI_BRANCH`           | WebUI branch/commit hash. (default `master`) |
+| `AUTO_UPDATE`            | Update A1111 Web UI on startup (default `false`) |
+| `WEBUI_BRANCH`           | WebUI branch/commit hash for auto update. (default `master`) |
 | `WEBUI_FLAGS`            | Startup flags. eg. `--no-half` |
 | `WEBUI_PORT_HOST`        | Web UI port (default `7860`) |
 | `WEBUI_URL`              | Override `$DIRECT_ADDRESS:port` with URL for Web UI |
@@ -94,17 +86,15 @@ To manage this service you can use `supervisorctl [start|stop|restart] webui`.
 
 **Vast.​ai**
 
-- [A1111 WebUI:latest](https://link.ai-dock.org/template-vast-sd-webui)
+- [A1111 WebUI:latest-cuda](https://link.ai-dock.org/template-vast-sd-webui)
 
-- [A1111 WebUI:latest-jupyter](https://link.ai-dock.org/template-vast-sd-webui-jupyter)
+- [A1111 WebUI:latest-rocm](https://link.ai-dock.org/template-vast-sd-webui-rocm)
 
 ---
 
 **Runpod.​io**
 
 - [A1111 WebUI:latest](https://link.ai-dock.org/template-runpod-sd-webui)
-
-- [A1111 WebUI:latest-jupyter](https://link.ai-dock.org/template-runpod-sd-webui-jupyter)
 
 ---
 
