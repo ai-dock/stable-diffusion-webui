@@ -6,11 +6,14 @@ services:
     build:
       context: ./build
       args:
-        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/jupyter-pytorch:2.2.1-py3.10-cuda-11.8.0-runtime-22.04}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.10}
+        PYTORCH_VERSION: ${PYTORCH_VERSION:-2.2.2}
+        WEBUI_TAG: ${WEBUI_TAG:-}
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/python:${PYTHON_VERSION:-3.10}-cuda-11.8.0-base-22.04}
       tags:
-        - "ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.2.1-py3.10-cuda-11.8.0-runtime-22.04}"
+        - "ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-cuda-11.8.0-base-22.04}"
         
-    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-jupyter-pytorch-2.2.1-py3.10-cuda-11.8.0-runtime-22.04}
+    image: ghcr.io/ai-dock/stable-diffusion-webui:${IMAGE_TAG:-cuda-11.8.0-base-22.04}
     
     devices:
       - "/dev/dri:/dev/dri"

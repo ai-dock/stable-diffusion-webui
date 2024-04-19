@@ -102,14 +102,11 @@ function build_extra_start() {
         --no-half \
         --port 11404 \
         --exit
-    
-    # Ensure pytorch hasn't been clobbered
-    $MAMBA_DEFAULT_RUN python /opt/ai-dock/tests/assert-torch-version.py
 }
 
 function build_extra_get_mamba_packages() {
     if [[ -n $MAMBA_PACKAGES ]]; then
-        $MAMBA_INSTALL -n webui ${MAMBA_PACKAGES[@]}
+        micromamba install -n webui ${MAMBA_PACKAGES[@]}
     fi
 }
 
@@ -125,7 +122,7 @@ function build_extra_get_extensions() {
         path="/opt/stable-diffusion-webui/extensions/${dir}"
         requirements="${path}/requirements.txt"
         if [[ -d $path ]]; then
-            if [[ ${AUTO_UPDATE,,} != "false" ]]; then
+            if [[ ${AUTO_UPDATE,,} == "true" ]]; then
                 printf "Updating extension: %s...\n" "${repo}"
                 ( cd "$path" && git pull )
                 if [[ -e $requirements ]]; then

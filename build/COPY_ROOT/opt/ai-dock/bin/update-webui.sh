@@ -17,6 +17,7 @@ done
 printf "Updating stable-diffusion-webui (${branch})...\n"
 
 cd /opt/stable-diffusion-webui
+git fetch --tags
 git checkout ${branch}
 git pull
 
