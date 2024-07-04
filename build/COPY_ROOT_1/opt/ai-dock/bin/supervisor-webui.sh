@@ -10,9 +10,16 @@ QUICKTUNNELS=true
 function cleanup() {
     kill $(jobs -p) > /dev/null 2>&1
     rm /run/http_ports/$PROXY_PORT > /dev/null 2>&1
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        deactivate
+    fi
 }
 
 function start() {
+    source /opt/ai-dock/etc/environment.sh
+    source /opt/ai-dock/bin/venv-set.sh serviceportal
+    source /opt/ai-dock/bin/venv-set.sh webui
+    
     if [[ ! -v WEBUI_PORT || -z $WEBUI_PORT ]]; then
         WEBUI_PORT=${WEBUI_PORT_HOST:-7860}
     fi
@@ -45,7 +52,7 @@ function start() {
     if [[ -f /run/workspace_sync || -f /run/container_config ]]; then
         fuser -k -SIGTERM ${LISTEN_PORT}/tcp > /dev/null 2>&1 &
         wait -n
-        /usr/bin/python3 /opt/ai-dock/fastapi/logviewer/main.py \
+        "$SERVICEPORTAL_VENV_PYTHON" /opt/ai-dock/fastapi/logviewer/main.py \
             -p $LISTEN_PORT \
             -r 5 \
             -s "${SERVICE_NAME}" \
@@ -65,9 +72,10 @@ function start() {
     
     FLAGS_COMBINED="${PLATFORM_FLAGS} ${BASE_FLAGS} $(cat /etc/a1111_webui_flags.conf)"
     printf "Starting %s...\n" "${SERVICE_NAME}"
-    
-    cd /opt/stable-diffusion-webui &&
-    exec micromamba run -n webui -e LD_PRELOAD=libtcmalloc.so python launch.py \
+
+    cd /opt/stable-diffusion-webui
+    source "$WEBUI_VENV/bin/activate"
+    LD_PRELOAD=libtcmalloc.so python launch.py \
         ${FLAGS_COMBINED} --port ${LISTEN_PORT}
 }
 

@@ -1,17 +1,14 @@
 #!/bin/bash
 
-# Use this layer to add nodes and models
+set -eo pipefail
+umask 002
 
-MAMBA_PACKAGES=(
-    #"package1"
-    #"package2=version"
-  )
+# Use this layer to add nodes and models
   
 PIP_PACKAGES=(
     #"package1==version"
     #"package2"
-  )
-
+)
 
 EXTENSIONS=(
     #"https://github.com/Mikubill/sd-webui-controlnet"
@@ -73,7 +70,6 @@ CONTROLNET_MODELS=(
 
 function build_extra_start() {
     source /opt/ai-dock/etc/environment.sh
-    build_extra_get_mamba_packages
     build_extra_get_pip_packages
     build_extra_get_extensions
     build_extra_get_models \
@@ -93,26 +89,23 @@ function build_extra_start() {
         "${ESRGAN_MODELS[@]}"
    
     cd /opt/stable-diffusion-webui && \
-        micromamba run -n webui -e LD_PRELOAD=libtcmalloc.so python launch.py \
-        --use-cpu all \
-        --skip-torch-cuda-test \
-        --skip-python-version-check \
-        --no-download-sd-model \
-        --do-not-download-clip \
-        --no-half \
-        --port 11404 \
-        --exit
-}
-
-function build_extra_get_mamba_packages() {
-    if [[ -n $MAMBA_PACKAGES ]]; then
-        micromamba install -n webui ${MAMBA_PACKAGES[@]}
-    fi
+        source "$WEBUI_VENV/bin/activate"
+        LD_PRELOAD=libtcmalloc.so \
+        python launch.py \
+            --use-cpu all \
+            --skip-torch-cuda-test \
+            --skip-python-version-check \
+            --no-download-sd-model \
+            --do-not-download-clip \
+            --no-half \
+            --port 11404 \
+            --exit
+        deactivate
 }
 
 function build_extra_get_pip_packages() {
     if [[ -n $PIP_PACKAGES ]]; then
-        micromamba run -n webui $PIP_INSTALL ${PIP_PACKAGES[@]}
+        "$WEBUI_VENV_PIP" install --no-cache-dir ${PIP_PACKAGES[@]}
     fi
 }
 
@@ -126,14 +119,14 @@ function build_extra_get_extensions() {
                 printf "Updating extension: %s...\n" "${repo}"
                 ( cd "$path" && git pull )
                 if [[ -e $requirements ]]; then
-                    micromamba -n webui run ${PIP_INSTALL} -r "$requirements"
+                    "$WEBUI_VENV_PIP" install --no-cache-dir -r "$requirements"
                 fi
             fi
         else
             printf "Downloading extension: %s...\n" "${repo}"
             git clone "${repo}" "${path}" --recursive
             if [[ -e $requirements ]]; then
-                micromamba -n webui run ${PIP_INSTALL} -r "${requirements}"
+                "$WEBUI_VENV_PIP" install --no-cache-dir -r "${requirements}"
             fi
         fi
     done

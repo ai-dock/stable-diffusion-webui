@@ -2,6 +2,8 @@
 umask 002
 branch=master
 
+source /opt/ai-dock/bin/venv-set.sh webui
+
 if [[ -n "${WEBUI_BRANCH}" ]]; then
     branch="${WEBUI_BRANCH}"
 fi
@@ -21,4 +23,4 @@ git fetch --tags
 git checkout ${branch}
 git pull
 
-micromamba run -n webui ${PIP_INSTALL} -r requirements_versions.txt
+"$WEBUI_VENV_PIP" install --no-cache-dir -r requirements_versions.txt
