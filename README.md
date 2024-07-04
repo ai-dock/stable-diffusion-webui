@@ -21,19 +21,19 @@ The `:latest` tag points to `:latest-cuda`
 Tags follow these patterns:
 
 ##### _CUDA_
-- `:cuda-[x.x.x]-[base|runtime]-[ubuntu-version]`
+- `:v2-cuda-[x.x.x]-[base|runtime]-[ubuntu-version]`
 
-- `:latest-cuda` &rarr; `:cuda-11.8.0-base-22.04`
+- `:latest-cuda` &rarr; `:v2-cuda-11.8.0-base-22.04`
 
 ##### _ROCm_
 - `:rocm-[x.x.x]-runtime-[ubuntu-version]`
 
-- `:latest-rocm` &rarr; `:rocm-5.7-runtime-22.04`
+- `:latest-rocm` &rarr; `:v2-rocm-6.0-core-22.04`
 
 ##### _CPU_
 - `:cpu-ubuntu-[ubuntu-version]`
 
-- `:latest-cpu` &rarr; `:cpu-22.04` 
+- `:latest-cpu` &rarr; `:v2-cpu-22.04` 
 
 Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment.
 
@@ -47,21 +47,21 @@ Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
 | ------------------------ | ----------- |
 | `AUTO_UPDATE`            | Update A1111 Web UI on startup (default `false`) |
 | `WEBUI_BRANCH`           | WebUI branch/commit hash for auto update. (default `master`) |
-| `WEBUI_FLAGS`            | Startup flags. eg. `--no-half` |
+| `WEBUI_FLAGS`            | Startup flags. eg. `--no-half --api` |
 | `WEBUI_PORT_HOST`        | Web UI port (default `7860`) |
 | `WEBUI_URL`              | Override `$DIRECT_ADDRESS:port` with URL for Web UI |
 
 See the base environment variables [here](https://github.com/ai-dock/base-image/wiki/2.0-Environment-Variables) for more configuration options.
 
-### Additional Micromamba Environments
+### Additional Python Environments
 
 | Environment    | Packages |
 | -------------- | ----------------------------------------- |
 | `webui`        | AUTOMATIC1111 WebUI and dependencies |
 
-This micromamba environment will be activated on shell login.
+This environment will be activated on shell login.
 
-See the base micromamba environments [here](https://github.com/ai-dock/base-image/wiki/1.0-Included-Software#installed-micromamba-environments).
+~~See the base micromamba environments [here](https://github.com/ai-dock/base-image/wiki/1.0-Included-Software#installed-micromamba-environments).~~
 
 
 ## Additional Services
