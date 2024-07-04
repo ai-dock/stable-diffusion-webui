@@ -17,7 +17,7 @@ jobs:
       matrix:
         build:
           # Undeclared release tag finds latest from GitHub tags
-          - {latest: "false", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0"}
+          - {latest: "true", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0"}
     steps:
       -
         name: Free Space
@@ -93,7 +93,7 @@ jobs:
       matrix:
         build:
           # Undeclared release tag finds latest from GitHub tags
-          - {latest: "false", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", cuda: "11.8.0-base"}
+          - {latest: "true", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", cuda: "11.8.0-base"}
           - {latest: "false", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", cuda: "12.1.1-base"}
           
     steps:
@@ -170,7 +170,7 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - {latest: "false", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", rocm: "6.0-core"}
+          - {latest: "true", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", rocm: "6.0-core"}
     steps:
       -
         name: Free Space
