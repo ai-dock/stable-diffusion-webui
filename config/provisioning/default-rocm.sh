@@ -94,18 +94,18 @@ function provisioning_start() {
         "${WORKSPACE}/storage/stable_diffusion/models/esrgan" \
         "${ESRGAN_MODELS[@]}"
      
-    PLATFORM_FLAGS=""
+    PLATFORM_ARGS=""
     if [[ $XPU_TARGET = "CPU" ]]; then
-        PLATFORM_FLAGS="--use-cpu all --skip-torch-cuda-test --no-half"
+        PLATFORM_ARGS="--use-cpu all --skip-torch-cuda-test --no-half"
     fi
-    PROVISIONING_FLAGS="--skip-python-version-check --no-download-sd-model --do-not-download-clip --port 11404 --exit"
-    FLAGS_COMBINED="${PLATFORM_FLAGS} $(cat /etc/a1111_webui_flags.conf) ${PROVISIONING_FLAGS}"
+    PROVISIONING_ARGS="--skip-python-version-check --no-download-sd-model --do-not-download-clip --port 11404 --exit"
+    ARGS_COMBINED="${PLATFORM_ARGS} $(cat /etc/a1111_webui_flags.conf) ${PROVISIONING_ARGS}"
     
     # Start and exit because webui will probably require a restart
     cd /opt/stable-diffusion-webui && \
     source $WEBUI_VENV/bin/activate
     LD_PRELOAD=libtcmalloc.so python launch.py \
-        ${FLAGS_COMBINED}
+        ${ARGS_COMBINED}
     deactivate
     provisioning_print_end
 }

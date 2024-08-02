@@ -17,7 +17,7 @@ jobs:
       matrix:
         build:
           # Undeclared release tag finds latest from GitHub tags
-          - {latest: "true", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0"}
+          - {latest: "false", tag: "v1.10.0", python: "3.10", pytorch: "2.3.1"}
     steps:
       -
         name: Free Space
@@ -33,19 +33,26 @@ jobs:
       -
         name: Env Setter
         run: |
-          echo "PACKAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+          REPO=${GITHUB_REPOSITORY,,}
+          echo "REPO_NAMESPACE=${REPO%%/*}" >> ${GITHUB_ENV}
+          echo "REPO_NAME=${REPO#*/}" >> ${GITHUB_ENV}
       -
         name: Checkout
         uses: actions/checkout@v3
       -
         name: Permissions fixes
         run: |
-          reponame="$(basename ${GITHUB_REPOSITORY})"
-          target="${HOME}/work/${reponame}/${reponame}/build/COPY*"
+          target="${HOME}/work/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}/build/COPY*"
           chmod -R ug+rwX ${target}
       -
+        name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
         name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -53,7 +60,7 @@ jobs:
       -
         name: Set tags
         run: |
-            img_path="ghcr.io/${{ env.PACKAGE_NAME }}"
+            img_path_ghcr="ghcr.io/${{ env.REPO_NAMESPACE }}/${{ env.REPO_NAME }}"
             if [[ -z '${{ matrix.build.tag }}' ]]; then
                 WEBUI_TAG="$(curl -s https://api.github.com/repos/AUTOMATIC1111/stable-diffusion-webui/tags | jq -r '.[0].name')"
             else
@@ -66,9 +73,9 @@ jobs:
 
             if [[ ${{ matrix.build.latest }} == "true" ]]; then
                 echo "Marking latest"
-                TAGS="${img_path}:${base_tag}-${WEBUI_TAG}, ${img_path}:${base_tag}, ${img_path}:latest-cpu, ${img_path}:latest-cpu-jupyter"
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_ghcr}:${base_tag}, ${img_path_ghcr}:latest-cpu"
             else
-                TAGS="${img_path}:${base_tag}-${WEBUI_TAG}"
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}"
             fi
             echo "TAGS=${TAGS}" >> ${GITHUB_ENV}
       -
@@ -93,8 +100,7 @@ jobs:
       matrix:
         build:
           # Undeclared release tag finds latest from GitHub tags
-          - {latest: "true", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", cuda: "11.8.0-base"}
-          - {latest: "false", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", cuda: "12.1.1-base"}
+          - {latest: "false", tag: "v1.10.0", python: "3.10", pytorch: "2.3.1", cuda: "12.1.1-base"}
           
     steps:
       -
@@ -111,19 +117,26 @@ jobs:
       -
         name: Env Setter
         run: |
-          echo "PACKAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+          REPO=${GITHUB_REPOSITORY,,}
+          echo "REPO_NAMESPACE=${REPO%%/*}" >> ${GITHUB_ENV}
+          echo "REPO_NAME=${REPO#*/}" >> ${GITHUB_ENV}
       -
         name: Checkout
         uses: actions/checkout@v3
       -
         name: Permissions fixes
         run: |
-          reponame="$(basename ${GITHUB_REPOSITORY})"
-          target="${HOME}/work/${reponame}/${reponame}/build/COPY*"
+          target="${HOME}/work/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}/build/COPY*"
           chmod -R ug+rwX ${target}
       -
+        name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
         name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -131,8 +144,8 @@ jobs:
       -
         name: Set tags
         run: |
-          img_path="ghcr.io/${{ env.PACKAGE_NAME }}"
-          
+          img_path_ghcr="ghcr.io/${{ env.REPO_NAMESPACE }}/${{ env.REPO_NAME }}"
+          img_path_dhub="${{ vars.DOCKERHUB_USER }}/${{ env.REPO_NAME }}-cuda"
           if [[ -z '${{ matrix.build.tag }}' ]]; then
                 WEBUI_TAG="$(curl -s https://api.github.com/repos/AUTOMATIC1111/stable-diffusion-webui/tags | jq -r '.[0].name')"
             else
@@ -145,9 +158,12 @@ jobs:
 
             if [[ ${{ matrix.build.latest }} == "true" ]]; then
                 echo "Marking latest"
-                TAGS="${img_path}:${base_tag}-${WEBUI_TAG}, ${img_path}:${base_tag}, ${img_path}:latest, ${img_path}:latest-jupyter, ${img_path}:latest-cuda"
+                # GHCR.io Tags
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_ghcr}:${base_tag}, ${img_path_ghcr}:latest, ${img_path_ghcr}:latest-cuda"
+                # Docker.io Tags
+                TAGS="${TAGS}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}, ${img_path_dhub}:latest"
             else
-                TAGS="${img_path}:${base_tag}-${WEBUI_TAG}"
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}"
             fi
           echo "TAGS=${TAGS}" >> ${GITHUB_ENV}
       -
@@ -170,7 +186,7 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - {latest: "true", tag: "v1.9.4", python: "3.10", pytorch: "2.3.0", rocm: "6.0-core"}
+          - {latest: "false", tag: "v1.10.0", python: "3.10", pytorch: "2.3.1", rocm: "6.0-core"}
     steps:
       -
         name: Free Space
@@ -186,19 +202,26 @@ jobs:
       -
         name: Env Setter
         run: |
-          echo "PACKAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+          REPO=${GITHUB_REPOSITORY,,}
+          echo "REPO_NAMESPACE=${REPO%%/*}" >> ${GITHUB_ENV}
+          echo "REPO_NAME=${REPO#*/}" >> ${GITHUB_ENV}
       -
         name: Checkout
         uses: actions/checkout@v3
       -
         name: Permissions fixes
         run: |
-          reponame="$(basename ${GITHUB_REPOSITORY})"
-          target="${HOME}/work/${reponame}/${reponame}/build/COPY*"
+          target="${HOME}/work/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}/build/COPY*"
           chmod -R ug+rwX ${target}
       -
+        name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
         name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -206,8 +229,8 @@ jobs:
       -
         name: Set tags
         run: |
-          img_path="ghcr.io/${{ env.PACKAGE_NAME }}"
-          
+          img_path_ghcr="ghcr.io/${{ env.REPO_NAMESPACE }}/${{ env.REPO_NAME }}"
+          img_path_dhub="${{ vars.DOCKERHUB_USER }}/${{ env.REPO_NAME }}-rocm"
           if [[ -z '${{ matrix.build.tag }}' ]]; then
                 WEBUI_TAG="$(curl -s https://api.github.com/repos/AUTOMATIC1111/stable-diffusion-webui/tags | jq -r '.[0].name')"
             else
@@ -216,13 +239,16 @@ jobs:
             [ -z "$WEBUI_TAG" ] && { echo "Error: WEBUI_TAG is empty. Exiting script." >&2; exit 1; }
             echo "WEBUI_TAG=${WEBUI_TAG}" >> ${GITHUB_ENV}
 
-            base_tag="v2-rocm-${{ matrix.build.rocm }}-${{ env.UBUNTU_VERSION }}"
+            base_tag="v2-cuda-${{ matrix.build.cuda }}-${{ env.UBUNTU_VERSION }}"
 
             if [[ ${{ matrix.build.latest }} == "true" ]]; then
                 echo "Marking latest"
-                TAGS="${img_path}:${base_tag}-${WEBUI_TAG}, ${img_path}:${base_tag}, ${img_path}:latest-rocm, ${img_path}:latest-rocm-jupyter"
+                # GHCR.io Tags
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_ghcr}:${base_tag}, ${img_path_ghcr}:latest-rocm"
+                # Docker.io Tags
+                TAGS="${TAGS}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}, ${img_path_dhub}:latest"
             else
-                TAGS="${img_path}:${base_tag}-${WEBUI_TAG}"
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}"
             fi
           echo "TAGS=${TAGS}" >> ${GITHUB_ENV}
       -

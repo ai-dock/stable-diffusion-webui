@@ -9,7 +9,7 @@ Run [Automatic1111 WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webu
 
 ## Documentation
 
-All AI-Dock containers share a common base which is designed to make running on cloud services such as [vast.ai](https://link.ai-dock.org/vast.ai) and [runpod.io](https://link.ai-dock.org/template) as straightforward and user friendly as possible.
+All AI-Dock containers share a common base which is designed to make running on cloud services such as [vast.ai](https://link.ai-dock.org/vast.ai) as straightforward and user friendly as possible.
 
 Common features and options are documented in the [base wiki](https://github.com/ai-dock/base-image/wiki) but any additional features unique to this image will be detailed below.
 
@@ -23,7 +23,7 @@ Tags follow these patterns:
 ##### _CUDA_
 - `:v2-cuda-[x.x.x]-[base|runtime]-[ubuntu-version]`
 
-- `:latest-cuda` &rarr; `:v2-cuda-11.8.0-base-22.04`
+- `:latest-cuda` &rarr; `:v2-cuda-12.1.1-base-22.04`
 
 ##### _ROCm_
 - `:rocm-[x.x.x]-runtime-[ubuntu-version]`
@@ -47,7 +47,7 @@ Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
 | ------------------------ | ----------- |
 | `AUTO_UPDATE`            | Update A1111 Web UI on startup (default `false`) |
 | `WEBUI_BRANCH`           | WebUI branch/commit hash for auto update. (default `master`) |
-| `WEBUI_FLAGS`            | Startup flags. eg. `--no-half --api` |
+| `WEBUI_ARGS`             | Startup arguments. eg. `--no-half --api` |
 | `WEBUI_PORT_HOST`        | Web UI port (default `7860`) |
 | `WEBUI_URL`              | Override `$DIRECT_ADDRESS:port` with URL for Web UI |
 
@@ -70,16 +70,14 @@ The following services will be launched alongside the [default services](https:/
 
 ### Stable Diffusion WebUI
 
-The service will launch on port `7860` unless you have specified an override with `WEBUI_PORT`.
+The service will launch on port `7860` unless you have specified an override with `WEBUI_PORT_HOST`.
 
-WebUI will be updated to the latest version on container start. You can pin the version to a branch or commit hash by setting the `WEBUI_BRANCH` variable.
+You can set startup arguments by using variable `WEBUI_ARGS`.
 
-You can set startup flags by using variable `WEBUI_FLAGS`.
-
-To manage this service you can use `supervisorctl [start|stop|restart] webui`.
+To manage this service you can use `supervisorctl [start|stop|restart] webui` or via the Service Portal application.
 
 >[!NOTE]
->All services are password protected by default. See the [security](https://github.com/ai-dock/base-image/wiki#security) and [environment variables](https://github.com/ai-dock/base-image/wiki/2.0-Environment-Variables) documentation for more information.
+>All services are password protected by default and HTTPS is available optionally. See the [security](https://github.com/ai-dock/base-image/wiki#security) and [environment variables](https://github.com/ai-dock/base-image/wiki/2.0-Environment-Variables) documentation for more information.
 
 
 ## Pre-Configured Templates
@@ -89,12 +87,6 @@ To manage this service you can use `supervisorctl [start|stop|restart] webui`.
 - [A1111 WebUI:latest-cuda](https://link.ai-dock.org/template-vast-sd-webui)
 
 - [A1111 WebUI:latest-rocm](https://link.ai-dock.org/template-vast-sd-webui-rocm)
-
----
-
-**Runpod.​io**
-
-- [A1111 WebUI:latest](https://link.ai-dock.org/template-runpod-sd-webui)
 
 ---
 

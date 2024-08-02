@@ -41,12 +41,12 @@ function start() {
     
     printf "Starting $SERVICE_NAME...\n"
     
-    PLATFORM_FLAGS=
+    PLATFORM_ARGS=
     if [[ $XPU_TARGET = "CPU" ]]; then
-        PLATFORM_FLAGS="--use-cpu all --skip-torch-cuda-test --no-half"
+        PLATFORM_ARGS="--use-cpu all --skip-torch-cuda-test --no-half"
     fi
     # No longer skipping prepare-environment
-    BASE_FLAGS=""
+    BASE_ARGS=""
     
     # Delay launch until micromamba is ready
     if [[ -f /run/workspace_sync || -f /run/container_config ]]; then
@@ -70,13 +70,13 @@ function start() {
     fuser -k -SIGKILL ${LISTEN_PORT}/tcp > /dev/null 2>&1 &
     wait -n
     
-    FLAGS_COMBINED="${PLATFORM_FLAGS} ${BASE_FLAGS} $(cat /etc/a1111_webui_flags.conf)"
+    ARGS_COMBINED="${PLATFORM_ARGS} ${BASE_ARGS} $(cat /etc/a1111_webui_args.conf)"
     printf "Starting %s...\n" "${SERVICE_NAME}"
 
     cd /opt/stable-diffusion-webui
     source "$WEBUI_VENV/bin/activate"
     LD_PRELOAD=libtcmalloc.so python launch.py \
-        ${FLAGS_COMBINED} --port ${LISTEN_PORT}
+        ${ARGS_COMBINED} --port ${LISTEN_PORT}
 }
 
 start 2>&1
