@@ -161,9 +161,9 @@ jobs:
                 # GHCR.io Tags
                 TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_ghcr}:${base_tag}, ${img_path_ghcr}:latest, ${img_path_ghcr}:latest-cuda"
                 # Docker.io Tags
-                TAGS="${TAGS}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}, ${img_path_dhub}:latest"
+                TAGS="${TAGS}, ${img_path_dhub}:${WEBUI_TAG}, ${img_path_dhub}:latest"
             else
-                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}"
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${WEBUI_TAG}"
             fi
           echo "TAGS=${TAGS}" >> ${GITHUB_ENV}
       -
@@ -246,9 +246,9 @@ jobs:
                 # GHCR.io Tags
                 TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_ghcr}:${base_tag}, ${img_path_ghcr}:latest-rocm"
                 # Docker.io Tags
-                TAGS="${TAGS}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}, ${img_path_dhub}:latest"
+                TAGS="${TAGS}, ${img_path_dhub}:${WEBUI_TAG}, ${img_path_dhub}:latest"
             else
-                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${base_tag}-${WEBUI_TAG}"
+                TAGS="${img_path_ghcr}:${base_tag}-${WEBUI_TAG}, ${img_path_dhub}:${WEBUI_TAG}"
             fi
           echo "TAGS=${TAGS}" >> ${GITHUB_ENV}
       -
