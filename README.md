@@ -35,7 +35,7 @@ Tags follow these patterns:
 
 - `:latest-cpu` &rarr; `:v2-cpu-22.04` 
 
-Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment.
+Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment. Alternatively, view a select range of [CUDA](https://hub.docker.com/r/aidockorg/stable-diffusion-webui-cuda) and [ROCm](https://hub.docker.com/r/aidockorg/stable-diffusion-webui-rocm) builds at DockerHub.
 
 Supported Python versions: `3.10`
 
