@@ -113,22 +113,8 @@ function build_extra_get_extensions() {
     for repo in "${EXTENSIONS[@]}"; do
         dir="${repo##*/}"
         path="/opt/stable-diffusion-webui/extensions/${dir}"
-        requirements="${path}/requirements.txt"
-        if [[ -d $path ]]; then
-            if [[ ${AUTO_UPDATE,,} == "true" ]]; then
-                printf "Updating extension: %s...\n" "${repo}"
-                ( cd "$path" && git pull )
-                if [[ -e $requirements ]]; then
-                    "$WEBUI_VENV_PIP" install --no-cache-dir -r "$requirements"
-                fi
-            fi
-        else
-            printf "Downloading extension: %s...\n" "${repo}"
-            git clone "${repo}" "${path}" --recursive
-            if [[ -e $requirements ]]; then
-                "$WEBUI_VENV_PIP" install --no-cache-dir -r "${requirements}"
-            fi
-        fi
+        printf "Downloading extension: %s...\n" "${repo}"
+        git clone "${repo}" "${path}" --recursive
     done
 }
 

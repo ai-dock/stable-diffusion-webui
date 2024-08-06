@@ -140,7 +140,7 @@ function pip_install() {
 
 function provisioning_get_apt_packages() {
     if [[ -n $APT_PACKAGES ]]; then
-            $APT_INSTALL ${APT_PACKAGES[@]}
+            sudo $APT_INSTALL ${APT_PACKAGES[@]}
     fi
 }
 
@@ -154,23 +154,15 @@ function provisioning_get_extensions() {
     for repo in "${EXTENSIONS[@]}"; do
         dir="${repo##*/}"
         path="/opt/stable-diffusion-webui/extensions/${dir}"
-        requirements="${path}/requirements.txt"
         if [[ -d $path ]]; then
             # Pull only if AUTO_UPDATE
             if [[ ${AUTO_UPDATE,,} == "true" ]]; then
                 printf "Updating extension: %s...\n" "${repo}"
                 ( cd "$path" && git pull )
             fi
-            # Always pip install
-            if [[ -e $requirements ]]; then
-                pip_install -r "$requirements"
-            fi
         else
             printf "Downloading extension: %s...\n" "${repo}"
             git clone "${repo}" "${path}" --recursive
-            if [[ -e $requirements ]]; then
-                pip_install -r "${requirements}"
-            fi
         fi
     done
 }
