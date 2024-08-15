@@ -35,7 +35,7 @@ Tags follow these patterns:
 
 - `:latest-cpu` &rarr; `:v2-cpu-22.04` 
 
-Browse [here](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment. Alternatively, view a select range of [CUDA](https://hub.docker.com/r/aidockorg/stable-diffusion-webui-cuda) and [ROCm](https://hub.docker.com/r/aidockorg/stable-diffusion-webui-rocm) builds at DockerHub.
+Browse [ghcr.io](https://github.com/ai-dock/stable-diffusion-webui/pkgs/container/stable-diffusion-webui) for an image suitable for your target environment. Alternatively, view a select range of [CUDA](https://hub.docker.com/r/aidockorg/stable-diffusion-webui-cuda) and [ROCm](https://hub.docker.com/r/aidockorg/stable-diffusion-webui-rocm) builds at DockerHub.
 
 Supported Python versions: `3.10`
 
@@ -46,9 +46,11 @@ Supported Platforms: `NVIDIA CUDA`, `AMD ROCm`, `CPU`
 | Variable                 | Description |
 | ------------------------ | ----------- |
 | `AUTO_UPDATE`            | Update A1111 Web UI on startup (default `false`) |
-| `WEBUI_BRANCH`           | WebUI branch/commit hash for auto update. (default `master`) |
+| `CIVITAI_TOKEN`          | Authenticate download requests from Civitai - Required for gated models |
+| `HF_TOKEN`               | Authenticate download requests from HuggingFace - Required for gated models (SD3, FLUX, etc.) |
 | `WEBUI_ARGS`             | Startup arguments. eg. `--no-half --api` |
 | `WEBUI_PORT_HOST`        | Web UI port (default `7860`) |
+| `WEBUI_REF`              | Git reference for auto update. Accepts branch, tag or commit hash. Default: latest release |
 | `WEBUI_URL`              | Override `$DIRECT_ADDRESS:port` with URL for Web UI |
 
 See the base environment variables [here](https://github.com/ai-dock/base-image/wiki/2.0-Environment-Variables) for more configuration options.
